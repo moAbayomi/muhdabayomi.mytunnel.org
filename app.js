@@ -1,11 +1,17 @@
-const http = require('http');
-const server = http.createServer((req, res) => {
-	res.write('hello tue tueh');
-	res.end();
+const http = require("http");
+const express = require("express");
+const app = express();
+const PORT = 3001;
+const cors = require("cors");
+
+app.use(cors());
+
+app.use(express.static("public"));
+
+app.get("/", (req, res) => {
+	res.render("index");
 });
 
-server.listen(3000)
-
-console.log('server running on 3000')
-
-
+app.listen(PORT, () => {
+	console.log(`server is running at http://localhost:${PORT}`);
+});
