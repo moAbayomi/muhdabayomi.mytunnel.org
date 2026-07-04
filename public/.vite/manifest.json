@@ -1,0 +1,21 @@
+{
+  "src/main.js": {
+    "file": "assets/main-BoDxNeZC.js",
+    "name": "main",
+    "src": "src/main.js",
+    "isEntry": true,
+    "imports": [
+      "src/styles/tailwind.css",
+      "src/styles/tailwind.css"
+    ]
+  },
+  "src/styles/tailwind.css": {
+    "file": "assets/tailwind-6taqqsBZ.js",
+    "name": "tailwind",
+    "src": "src/styles/tailwind.css",
+    "isEntry": true,
+    "css": [
+      "assets/tailwind-COhDHv0K.css"
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+import{n as e,t}from"./tailwind-6taqqsBZ.js";var n=e((()=>{t(),console.log(`Frontend assets linked!`)}));export default n();
