@@ -1,0 +1,22 @@
+<% title = "muhammad's website"; %>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title><%= title || 'My App' %></title>
+
+    <% if (process.env.NODE_ENV === 'development') { %>
+      <!-- Vite dev server serves the module directly in dev -->
+      <script type="module" src="http://localhost:5173/src/main.js"></script>
+      <link rel="stylesheet" href="http://localhost:5173/src/styles/tailwind.css">
+    <% } else { %>
+      <!-- In production we use the built asset paths provided by app.locals.assetPath -->
+      <link rel="stylesheet" href="<%= assetPath('src/styles/tailwind.css', 'css') %>">
+      <script type="module" src="<%= assetPath('src/main.js', 'js') %>"></script>
+    <% } %>
+  </head>
+  <body class="bg-red-600">
+    <%- body %>
+  </body>
+</html>
