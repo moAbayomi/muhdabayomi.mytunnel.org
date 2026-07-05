@@ -1,0 +1,48 @@
+name: Deploy Web Application
+
+# Trigger this script every time code is pushed to the main branch
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # Boot up a fresh, free Linux machine in GitHub's cloud
+
+    steps:
+    # Step 1: Download your source code onto the cloud machine
+    - name: Checkout Repository Code
+      uses: actions/checkout@v4
+
+    # Step 2: Set up Node.js on the cloud machine
+    - name: Setup Node.js Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    # Step 3: Install all packages strictly and build your Tailwind CSS / Manifest
+    - name: Install Dependencies and Build Assets
+      run: |
+        npm ci
+        npm run build
+
+    # Step 4: Securely log into your EC2 server and deploy the files
+    - name: Deploy to EC2 Server via SSH
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}       # Your EC2 Public IP address
+        username: ${{ secrets.EC2_USERNAME }} # e.g., 'ubuntu' or 'moyomi'
+        key: ${{ secrets.EC2_SSH_KEY }}       # Your private .pem key file content
+        source: "./"                        # Copy everything (including the new public folder)
+        target: "/var/www/app"              # Put it directly in your live folder
+
+    # Step 5: Tell PM2 to restart your app now that the files are safely on the drive
+    - name: Restart Application Server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd /var/www/app
+          pm2 restart app

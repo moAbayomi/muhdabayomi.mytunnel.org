@@ -34,10 +34,20 @@ app.locals.assetPath = function (logicalPath, type) {
 		// dev handled in template via Vite URL
 		return logicalPath;
 	}
-	if (!manifest) return logicalPath;
+	if (!manifest) {
+		try {
+		manifest = JSON.parse(
+			fs.readFileSync(
+				path.join(__dirname, "public/.vite/manifest.json"),
+				"utf8",
+			),
+		);
+	} catch (e) {
+		console.warn("Vite manifest still building");
+		return logicalPath
+	}
+	}
 	const entry = manifest[logicalPath];
-	console.log(logicalPath);
-	console.log(entry);
 	if (!entry) return logicalPath;
 	if (type === "css" && entry.css && entry.css.length > 0) {
 		return "/" + entry.css[0];
