@@ -1,0 +1,1 @@
+import{n as e,t}from"./tailwind-T6IIIO5L.js";var n=e((()=>{t(),console.log(`Frontend assets linked!`);function e(){let e=new Intl.DateTimeFormat(`en-US`,{timeZone:`Africa/Lagos`,hour:`numeric`,minute:`2-digit`}).format(new Date);document.getElementById(`local-time`).textContent=`${e.replace(/\s?(AM|PM)/i,``)} in Osun, Nigeria`}e(),setInterval(e,1e3*30)}));export default n();
