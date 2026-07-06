@@ -18,7 +18,7 @@ jobs:
     - name: Setup Node.js Environment
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '24.18.0'
 
     # Step 3: Install all packages strictly and build your Tailwind CSS / Manifest
     - name: Install Dependencies and Build Assets
