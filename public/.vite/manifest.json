@@ -1,6 +1,6 @@
 {
   "src/main.js": {
-    "file": "assets/main-DVv1mDpz.js",
+    "file": "assets/main-D0QSjS_d.js",
     "name": "main",
     "src": "src/main.js",
     "isEntry": true,
@@ -10,12 +10,12 @@
     ]
   },
   "src/styles/tailwind.css": {
-    "file": "assets/tailwind-D016HGN2.js",
+    "file": "assets/tailwind-DrcnMDRK.js",
     "name": "tailwind",
     "src": "src/styles/tailwind.css",
     "isEntry": true,
     "css": [
-      "assets/tailwind-Cdl4yXjY.css"
+      "assets/tailwind-C7XMQyaX.css"
     ]
   }
 }

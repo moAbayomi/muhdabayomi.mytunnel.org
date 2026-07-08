@@ -2,6 +2,28 @@
 @source "../../views/**/*.ejs";
 @source "./views/**/*.ejs";
 
+
+@font-face {
+    font-family: 'Inter';
+    src: url('../fonts/Inter.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Instrument Serif';
+    src: url('../fonts/InstrumentSerif-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Instrument Serif';
+    src: url('../fonts/InstrumentSerif-Italic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+@font-face {
+    font-family: 'Iowan';
+    src: url('../fonts/Iowan-regular.otf') format('opentype');
+}
+
 @theme inline {
 	--color-text-main: var(--primary);
 	--color-bg-main: var(--secondary);
@@ -19,6 +41,10 @@
 	--spacing-fluid-sm: var(--space-sm);
 	--spacing-fluid-md: var(--space-md);
 	--spacing-fluid-lg: var(--space-lg);
+
+	--font-inter: "Inter", sans-serif;
+	--font-instrument: "Instrument Serif", serif;
+	--font-iowan: "Iowan", serif;
 }
 
 :root {

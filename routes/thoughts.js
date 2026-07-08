@@ -50,7 +50,6 @@ router.get("/:slug", (req, res) => {
 		.get(req.params.slug);
 
 	if (!entry) return res.status(404).render("404");
-
 	res.render("thoughts/thoughts_entry", { entry });
 });
 

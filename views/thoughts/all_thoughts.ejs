@@ -1,73 +1,45 @@
 <section>
-	<div id="month-block" class="mb-fluid-lg">
-		<p
-			id="month-label"
-			class="text-body py-fluid-md text-right text-text-muted">
-			July 2026
-		</p>
-		<div>
-			<a
-				href="#"
-				id="entry-row"
-				class="text-text-body flex justify-between pb-4">
-				<p class="entry-title">On finally shipping the portfolio site</p>
-				<span class="entry-day">15th</span>
-			</a>
-			<a
-				href="#"
-				id="entry-row"
-				class="text-text-body flex justify-between pb-4">
-				<p class="entry-title">A short note on cron jobs</p>
-				<span class="entry-day">9th</span>
-			</a>
-			<a
-				href="#"
-				id="entry-row"
-				class="text-text-body flex justify-between pb-4">
-				<p class="entry-title">Started Infinite Jest again</p>
-				<span class="entry-day">3rd</span>
-			</a>
-		</div>
-	</div>
+    <% Object.keys(grouped).forEach(month => { %>
+    <!-- Month Block Container -->
+    <div id="month-block" class="mb-fluid-lg">
+        
+        <!-- Dynamic Month Label -->
+        <p id="month-label" class="text-body py-fluid-md text-right text-text-muted">
+            <%= month %>
+        </p>
+        
+        <div>
+            <!-- Loop through all entries for this specific month -->
+            <% grouped[month].forEach(entry => { %>
+                
+                <!-- Format the specific day number (e.g., 28, 14) -->
+                <% 
+                    const dayNumber = new Intl.DateTimeFormat("en-US", { 
+                        day: "numeric",
+                        timeZone: "Africa/Lagos" 
+                    }).format(new Date(entry.created_at));
+                    
+                    // Simple rule to add English day suffixes (st, nd, rd, th)
+                    let suffix = "th";
+                    if (dayNumber === "1" || dayNumber === "21" || dayNumber === "31") suffix = "st";
+                    else if (dayNumber === "2" || dayNumber === "22") suffix = "nd";
+                    else if (dayNumber === "3" || dayNumber === "23") suffix = "rd";
+                %>
 
-	<div id="month-block" class="mb-fluid-lg">
-		<p
-			id="month-label"
-			class="text-body py-fluid-md text-right text-text-muted">
-			June 2026
-		</p>
-		<div>
-			<a
-				href="#"
-				id="entry-row"
-				class="text-text-body flex justify-between pb-4">
-				<p class="entry-title">Thoughts on teaching beginners JS</p>
-				<span class="entry-day">28th</span>
-			</a>
-			<a
-				href="#"
-				id="entry-row"
-				class="text-text-body flex justify-between pb-4">
-				<p class="entry-title">Nand2tetris, week two</p>
-				<span class="entry-day">14th</span>
-			</a>
-		</div>
-	</div>
+                <!-- Dynamic Entry Link -->
+                <a href="/thoughts/<%= entry.slug || '#' %>" id="entry-row" class="text-text-body flex justify-between pb-4">
+                    <p class="entry-title"><%= entry.title %></p>
+                    <span class="entry-day"><%= dayNumber %><%= suffix %></span>
+                </a>
 
-	<div id="month-block" class="mb-fluid-lg">
-		<p
-			id="month-label"
-			class="text-body py-fluid-md text-right text-text-muted">
-			May 2026
-		</p>
-		<div>
-			<a
-				href="#"
-				id="entry-row"
-				class="text-text-body flex justify-between pb-4">
-				<p class="entry-title">A quiet one</p>
-				<span class="entry-day">2nd</span>
-			</a>
-		</div>
-	</div>
+            <% }); %>
+        </div>
+
+    </div>
+<% }); %>
+
+</section>
+
+<section class="mt-fluid-lg">
+	<a href="/" class="text-text-muted">&larr; home</a>
 </section>
