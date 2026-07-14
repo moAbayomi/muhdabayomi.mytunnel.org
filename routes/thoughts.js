@@ -36,7 +36,7 @@ function groupByMonth(entries) {
 
 router.get("/", (req, res) => {
 	const entries = db
-		.prepare("SELECT * FROM entries ORDER BY note_modified DESC")
+		.prepare("SELECT * FROM entries WHERE deleted_at IS NULL ORDER BY note_modified DESC")
 		.all();
 
 	res.render("thoughts/all_thoughts", {
@@ -85,6 +85,7 @@ router.post("/", requireAuth, upload.single("photo"), (req, res) => {
 // DELETE /thoughts/:sourceNoteId — soft-delete, called when a note disappears from Notes
 router.delete("/", requireAuth, (req, res) => {
 	const noteID = req.query.sourceNoteId;
+
 
 	if (!noteID) {
 		return res.status(400).json({ error: "Missing sourceNoteId parameter" });
