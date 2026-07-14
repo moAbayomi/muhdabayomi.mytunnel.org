@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const db = require("../db");
 const { requireAuth } = require("../middleware/auth");
 const { slugify } = require("../utils/slugify");
+const { marked } = require("marked");
 
 const router = express.Router();
 
@@ -35,7 +36,7 @@ function groupByMonth(entries) {
 
 router.get("/", (req, res) => {
 	const entries = db
-		.prepare("SELECT * FROM entries ORDER BY created_at DESC")
+		.prepare("SELECT * FROM entries ORDER BY note_modified DESC")
 		.all();
 
 	res.render("thoughts/all_thoughts", {
@@ -54,18 +55,31 @@ router.get("/:slug", (req, res) => {
 });
 
 router.post("/", requireAuth, upload.single("photo"), (req, res) => {
-	const { title, content } = req.body;
+	const { title, content, source_note_id, note_modified } = req.body;
 
-	if (!title || !content) {
-		return res.status(400).json({ error: "title and content are required" });
+	if (!title || !content || !source_note_id || !note_modified) {
+		return res
+			.status(400)
+			.json({
+				error: "title, content, source_note_id, note_modified are required",
+			});
 	}
 
 	const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
 	const slug = slugify(title);
+	const htmlContent = marked.parse(content);
 
 	db.prepare(
-		`INSERT INTO entries (slug, title, content, photo_url) VALUES (?, ?, ?, ?)`,
-	).run(slug, title, content, photoUrl);
+		`INSERT INTO entries (slug, title, content, source_note_id, note_modified, photo_url) VALUES (?, ?, ?, ?, ?, ?)
+		ON CONFLICT(source_note_id) DO UPDATE SET
+		title = excluded.title,
+		content = excluded.content,
+		note_modified = excluded.note_modified,
+		photo_url = excluded.photo_url,
+		created_at = datetime('now')
+
+		`,
+	).run(slug, title, htmlContent, source_note_id, note_modified, photoUrl);
 
 	res.status(201).json({ slug, url: `/thoughts/${slug}` });
 });

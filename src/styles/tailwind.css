@@ -2,27 +2,10 @@
 @source "../../views/**/*.ejs";
 @source "./views/**/*.ejs";
 
+@plugin "@tailwindcss/typography";
 
-@font-face {
-    font-family: 'Inter';
-    src: url('../fonts/Inter.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'Instrument Serif';
-    src: url('../fonts/InstrumentSerif-Regular.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
-@font-face {
-    font-family: 'Instrument Serif';
-    src: url('../fonts/InstrumentSerif-Italic.ttf') format('truetype');
-    font-weight: normal;
-    font-style: italic;
-}
-@font-face {
-    font-family: 'Iowan';
-    src: url('../fonts/Iowan-regular.otf') format('opentype');
-}
+
+
 
 @theme inline {
 	--color-text-main: var(--primary);
@@ -54,8 +37,8 @@
 
 	/* Font Size Values */
 	--fs-h1: 2.25rem; /* 36px */
-	--fs-h2: 1.5rem; /* 24px */
-	--fs-body: 1rem; /* 16px */
+	--fs-h2: 1.65rem; /* 24px */
+	--fs-body: 1.25rem; /* 16px */
 
 	/* Spacing Scale Values */
 	--space-sm: 0.5rem; /* 8px */

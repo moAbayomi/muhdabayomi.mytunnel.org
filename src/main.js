@@ -1,9 +1,6 @@
 import "./styles/tailwind.css";
 
 document.addEventListener("DOMContentLoaded", () => {
-	console.log("Frontend assets linked!");
-    console.log(process.env.NODE_ENV)
-
 	function updateTime() {
 		const time = new Intl.DateTimeFormat("en-US", {
 			timeZone: "Africa/Lagos",

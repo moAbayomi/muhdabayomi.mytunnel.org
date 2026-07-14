@@ -27,8 +27,9 @@
                 %>
 
                 <!-- Dynamic Entry Link -->
-                <a href="/thoughts/<%= entry.slug || '#' %>" id="entry-row" class="text-text-body flex justify-between pb-4">
+                <a href="/thoughts/<%= entry.slug || '#' %>" id="entry-row" class="group text-text-body flex items-end justify-between pb-4">
                     <p class="entry-title"><%= entry.title %></p>
+                    <hr class="text-text-muted group-hover:text-text-main flex-1 border-dotted h-1 mx-4">
                     <span class="entry-day"><%= dayNumber %><%= suffix %></span>
                 </a>
 
