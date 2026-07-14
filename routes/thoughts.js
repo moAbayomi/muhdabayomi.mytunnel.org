@@ -58,11 +58,9 @@ router.post("/", requireAuth, upload.single("photo"), (req, res) => {
 	const { title, content, source_note_id, note_modified } = req.body;
 
 	if (!title || !content || !source_note_id || !note_modified) {
-		return res
-			.status(400)
-			.json({
-				error: "title, content, source_note_id, note_modified are required",
-			});
+		return res.status(400).json({
+			error: "title, content, source_note_id, note_modified are required",
+		});
 	}
 
 	const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
@@ -84,4 +82,27 @@ router.post("/", requireAuth, upload.single("photo"), (req, res) => {
 	res.status(201).json({ slug, url: `/thoughts/${slug}` });
 });
 
+// DELETE /thoughts/:sourceNoteId — soft-delete, called when a note disappears from Notes
+router.delete("/:sourceNoteId", requireAuth, (req, res) => {
+	const result = db
+		.prepare(
+			`UPDATE entries SET deleted_at = datetime('now')
+			 WHERE source_note_id = ? AND deleted_at IS NULL`,
+		)
+		.run(req.params.sourceNoteId);
+
+	if (result.changes === 0) {
+		return res.status(404).json({ error: "not found or already deleted" });
+	}
+
+	res.json({ deleted: true });
+});
+
+// POST /thoughts/media — uploads one image, returns its hosted URL.
+router.post("/media", requireAuth, upload.single("photo"), (req, res) => {
+	if (!req.file) {
+		return res.status(400).json({ error: "no photo provided" });
+	}
+	res.status(201).json({ url: `/uploads/${req.file.filename}` });
+});
 module.exports = router;
