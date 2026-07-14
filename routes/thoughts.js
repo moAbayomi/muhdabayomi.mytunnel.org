@@ -83,13 +83,18 @@ router.post("/", requireAuth, upload.single("photo"), (req, res) => {
 });
 
 // DELETE /thoughts/:sourceNoteId — soft-delete, called when a note disappears from Notes
-router.delete("/:sourceNoteId", requireAuth, (req, res) => {
+router.delete("/", requireAuth, (req, res) => {
+	const noteID = req.query.sourceNoteId;
+
+	if (!noteID) {
+		return res.status(400).json({ error: "Missing sourceNoteId parameter" });
+	}
 	const result = db
 		.prepare(
 			`UPDATE entries SET deleted_at = datetime('now')
 			 WHERE source_note_id = ? AND deleted_at IS NULL`,
 		)
-		.run(req.params.sourceNoteId);
+		.run(noteID);
 
 	if (result.changes === 0) {
 		return res.status(404).json({ error: "not found or already deleted" });
