@@ -2,6 +2,9 @@
 @source "../../views/**/*.ejs";
 @source "./views/**/*.ejs";
 
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+
 @plugin "@tailwindcss/typography";
 
 
@@ -26,14 +29,14 @@
 	--spacing-fluid-lg: var(--space-lg);
 
 	--font-inter: "Inter", sans-serif;
-	--font-instrument: "Instrument Serif", serif;
-	--font-iowan: "Iowan", serif;
 }
 
 :root {
-	--primary: #d8d4cd;
-	--secondary: #161514;
-	--accent: #706a63;
+
+	--primary: #161514;
+	--secondary: #fcfbfa;
+	--accent: #85807a;
+	
 
 	/* Font Size Values */
 	--fs-h1: 2.25rem; /* 36px */
@@ -47,7 +50,7 @@
 }
 
 .dark {
-	--primary: #161514;
-	--secondary: #fcfbfa;
-	--accent: #85807a;
+	--primary: #d8d4cd;
+	--secondary: #161514;
+	--accent: #706a63;
 }

@@ -4,7 +4,7 @@
   "description": "",
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "app.js",
   "scripts": {
     "dev:server": "nodemon --watch ./ --exec \"node app.js\"",
@@ -14,6 +14,7 @@
     "start": "NODE_ENV=production node app.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1088.0",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.2",
     "better-sqlite3": "^12.11.1",
@@ -23,7 +24,8 @@
     "express": "^5.2.1",
     "express-ejs-layouts": "^2.5.1",
     "marked": "^18.0.6",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "sharp": "^0.35.3"
   },
   "devDependencies": {
     "concurrently": "^10.0.3",

@@ -1,12 +1,19 @@
-const express = require("express");
-const path = require("path");
-const expressLayouts = require("express-ejs-layouts");
-require("dotenv").config();
-const fs = require("fs");
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import expressLayouts from "express-ejs-layouts";
+import dotenv from "dotenv";
+import fs from "fs";
 
-const { assetPath } = require("./utils/vite");
-const pageRoutes = require("./routes/pages");
-const thoughtsRoutes = require("./routes/thoughts");
+import { assetPath } from "./utils/vite.js";
+import pageRoutes from "./routes/pages.js";
+import thoughtsRoutes from "./routes/thoughts.js";
+
+// Recreate __dirname (not available in ESM)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config();
 
 const app = express();
 app.set("view engine", "ejs");
@@ -26,5 +33,5 @@ app.use("/thoughts", thoughtsRoutes);
 // start server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-	console.log(`Server listening on ${port}`);
+  console.log(`Server listening on ${port}`);
 });
