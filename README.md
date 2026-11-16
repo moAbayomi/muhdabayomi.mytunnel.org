@@ -157,6 +157,7 @@ Base path `/v1`. There is no authentication yet (Phase 4); every route below is 
 | `GET` | `/v1/search?q=&lim=&off=` | full-text, ranked; `q` must be ≥ 2 chars |
 | `GET` | `/v1/stats` | one row per kind: count and total reading minutes |
 | `POST` | `/v1/auth/login` | password → `{ token }`; rate-limited per IP |
+| `GET` | `/v1/media/*` | serves an uploaded object; used when `R2_PUBLIC_URL` is unset |
 
 ### Admin
 
@@ -177,6 +178,15 @@ middleware is mounted on the subtree, so a new admin route is protected by defau
 | `GET` | `/v1/admin/notes/:id/revisions` | newest first, with a body preview |
 | `POST` | `/v1/admin/notes/:id/revisions/:revId/restore` | restores that snapshot |
 | `POST` | `/v1/admin/rebuild` | triggers the Pages deploy hook; `503` if unset |
+| `POST` | `/v1/admin/media` | multipart `file` → `201` media row; 10 MB cap |
+| `DELETE` | `/v1/admin/media/:id` | removes the row and the R2 object, `204` |
+
+`POST /v1/admin/media` takes `multipart/form-data` with a `file` field (and optional
+`alt`). The type is decided by **magic bytes**, not the filename or the client's
+`Content-Type`: JPEG, PNG and WebP only, anything else is `415`. Objects are keyed
+`YYYY/MM/<uuid>.<ext>` and served with `Cache-Control: immutable`. With
+`R2_PUBLIC_URL` set the row stores that public URL; without it (local dev, tests) the
+URL points at `GET /v1/media/*`.
 
 `PATCH` sends back the `updated_at` it last saw. If the note changed since, it gets
 `409 stale_note` with the **current** note in `error.details.current`, so the editor can

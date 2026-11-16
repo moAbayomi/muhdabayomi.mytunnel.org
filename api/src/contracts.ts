@@ -138,3 +138,19 @@ export const NoteLinksReport = z.object({
 export type AdminNoteSummary = z.infer<typeof AdminNoteSummary>;
 export type CreateNoteInput = z.infer<typeof CreateNoteInput>;
 export type PatchNoteInput = z.infer<typeof PatchNoteInput>;
+
+// ─── media ───────────────────────────────────────────────────────────
+
+export const Media = z.object({
+  id: z.string().uuid(),
+  r2_key: z.string(),
+  url: z.string(),
+  mime: z.string(),
+  bytes: z.number().int().nonnegative(),
+  width: z.number().int().nullable(),
+  height: z.number().int().nullable(),
+  alt: z.string().nullable(),
+  created_at: z.string().datetime(),
+});
+
+export type Media = z.infer<typeof Media>;

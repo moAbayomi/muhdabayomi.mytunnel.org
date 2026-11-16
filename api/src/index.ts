@@ -16,7 +16,9 @@ import search from "./routes/search";
 import { HTTPException } from "hono/http-exception";
 import auth from "./routes/auth";
 import adminNotes from "./routes/admin-notes";
+import adminMedia from "./routes/admin-media";
 import adminRebuild from "./routes/admin-rebuild";
+import media from "./routes/media";
 import { requireAuth } from "./middleware/requireAuth";
 
 export interface Env {
@@ -79,10 +81,15 @@ app.post(
 
 app.route("/v1/auth", auth);
 
+// Public read-through to R2. Unused in production once R2_PUBLIC_URL points at
+// a custom domain, but it is what makes uploads viewable in local dev and tests.
+app.route("/v1/media", media);
+
 // One middleware for the whole subtree: every admin route added later is
 // protected by default rather than by remembering to add requireAuth().
 app.use("/v1/admin/*", requireAuth());
 app.route("/v1/admin/notes", adminNotes);
+app.route("/v1/admin/media", adminMedia);
 app.route("/v1/admin/rebuild", adminRebuild);
 
 app.route("/v1/health", health);

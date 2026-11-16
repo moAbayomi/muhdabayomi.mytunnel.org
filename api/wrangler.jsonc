@@ -13,6 +13,13 @@
     "ADMIN_PASSWORD": "",
     "AUTH_SECRET": "",
     "DEPLOY_HOOK_URL": "",
+    "R2_PUBLIC_URL": "",
     "ENVIRONMENT": ""
-  }
+  },
+  "r2_buckets": [
+    {
+      "binding": "MEDIA_BUCKET",
+      "bucket_name": "wiki-media"
+    }
+  ]
 }
