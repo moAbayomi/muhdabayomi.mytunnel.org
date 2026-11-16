@@ -2,6 +2,12 @@ import { cloudflareTest } from "@cloudflare/vitest-plugin";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // Test files share one database, so they must not run in parallel:
+  // an admin test that publishes a note would otherwise race the public
+  // directory assertions in api.test.ts.
+  test: {
+    fileParallelism: false,
+  },
   plugins: [
     cloudflareTest({
       wrangler: { configPath: "./wrangler.jsonc" },

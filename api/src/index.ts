@@ -15,6 +15,8 @@ import wikiStats from "./routes/wiki-stats";
 import search from "./routes/search";
 import { HTTPException } from "hono/http-exception";
 import auth from "./routes/auth";
+import adminNotes from "./routes/admin-notes";
+import adminRebuild from "./routes/admin-rebuild";
 import { requireAuth } from "./middleware/requireAuth";
 
 export interface Env {
@@ -76,6 +78,13 @@ app.post(
 );
 
 app.route("/v1/auth", auth);
+
+// One middleware for the whole subtree: every admin route added later is
+// protected by default rather than by remembering to add requireAuth().
+app.use("/v1/admin/*", requireAuth());
+app.route("/v1/admin/notes", adminNotes);
+app.route("/v1/admin/rebuild", adminRebuild);
+
 app.route("/v1/health", health);
 app.route("/v1/directory", directory);
 app.route("/v1/notes", notes);
