@@ -1,8 +1,21 @@
+# dependencies
 node_modules
+.pnpm-store
+
+# local env / secrets
 .env
 .dev.vars
-.DS_Store
+
+# build output
 dist
 .astro
 .wrangler
+
+# tooling
+coverage
+*.tsbuildinfo
 *.log
+
+# os / agent
+.DS_Store
+.reasonix
