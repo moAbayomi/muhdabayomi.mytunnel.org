@@ -4,6 +4,35 @@ Reverse-chronological. One entry per decision that would be expensive to undo.
 
 ---
 
+## 2026-11-09 — The site is a wiki, not a blog
+
+**Context:** reference sites — `patrikarvidsson.com`, `williamjansson.com`,
+`namitjuneja.com`. Patrik's `Horizon` page describes the actual machine: a Markdown
+knowledgebase, notes marked `public: true`, read at build time into static HTML by Lume,
+no client-side JavaScript.
+
+**Decision:** model the site as a flat-namespace wiki. Every public page is a note.
+`[[slug]]` in a body creates an edge in `note_links`; a trigger rebuilds those edges on
+save. `/directory` is alphabetical. The home page shows counts, not chronology. RSS is a
+"recently updated" feed, not a subscribe-to-my-blog feed.
+
+**Why:** the content is short notes of varying length, not dated essays. A chronological
+feed imposes an order the writing doesn't have. Links between notes are more useful than
+tags, and backlinks are the thing that makes browsing pay off.
+
+**Consequences:**
+- Schema gains `note_links`, `parent_id`, and `kind` (`note` / `page` / `project`).
+- Tags are dropped from v1 — links replace them.
+- Phase 8 becomes `/directory` + `/<slug>` with a "Linked from" section, not an index.
+- Reserved slugs must be rejected by the API: `index`, `directory`, `404`, `rss.xml`,
+  `sitemap-index.xml`, `admin`, `api`.
+
+**Trade-off:** a wiki degrades into an unordered blog if you don't link. The backlink
+panel is the payoff for the discipline, and the editor should warn on unresolved
+`[[...]]` rather than silently dropping them.
+
+---
+
 ## 2026-11-09 — Static Astro frontend + Hono Worker API + Postgres
 
 **Context:** the previous site was Express + EJS server-rendered on a single EC2

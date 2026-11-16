@@ -8,6 +8,10 @@
     "enabled": true
   },
   "vars": {
-    "WEB_ORIGIN": "http://localhost:4321"
+    "WEB_ORIGIN": "http://localhost:4321",
+    "DATABASE_URL": "",
+    "ADMIN_PASSWORD": "",
+    "AUTH_SECRET": "",
+    "ENVIRONMENT": ""
   }
 }
