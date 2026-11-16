@@ -1,0 +1,31 @@
+---
+interface Backlink {
+  slug: string;
+  title: string;
+}
+
+interface Props {
+  links: Backlink[];
+}
+
+const { links } = Astro.props;
+---
+
+{
+  links.length > 0 && (
+    <section class="mt-12 border-t border-rule pt-6">
+      <h2 class="font-mono text-meta uppercase tracking-[0.18em] text-muted">
+        linked from
+      </h2>
+      <ul class="mt-3 space-y-1">
+        {links.map((link) => (
+          <li>
+            <a href={`/${link.slug}`} class="bracket-link text-body">
+              {link.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

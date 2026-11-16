@@ -1,18 +1,21 @@
 ---
-const title = "muhammad's website";
+import Base from "../layouts/Base.astro";
+import BracketedLink from "../components/BracketedLink.astro";
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-  </head>
-  <body>
-    <main>
-      <h1>hello</h1>
-      <p>Phase 1 skeleton. The design system lands in Phase 7.</p>
-    </main>
-  </body>
-</html>
+<Base>
+  <section>
+    <h1 class="text-h1">mo abayomi.</h1>
+    <p class="mt-4 font-mono text-meta text-muted">tinkerer · osun, nigeria</p>
+
+    <p class="mt-12 max-w-prose text-lede">
+      I'm a developer building things on the web. This is my wiki: a place for notes,
+      projects, and things I'm still working out.
+    </p>
+
+    <p class="mt-6 max-w-prose text-body text-muted">
+      The directory and notes arrive in the next phase. For now,
+      <BracketedLink href="/styleguide" label="the styleguide" /> shows the design system.
+    </p>
+  </section>
+</Base>

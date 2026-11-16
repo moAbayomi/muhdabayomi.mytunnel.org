@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+/* The theme toggle writes data-theme on <html>; dark: utilities key off it. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ------------------------------------------------------------------
+   Type
+   Fonts are referenced by their Fontsource family names with system
+   fallbacks. To self-host, install the three packages and import them
+   in Base.astro — no other change needed:
+
+     pnpm --filter web add \
+       @fontsource-variable/instrument-sans \
+       @fontsource-variable/newsreader \
+       @fontsource-variable/jetbrains-mono
+   ------------------------------------------------------------------ */
+@theme {
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino,
+    Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo,
+    monospace;
+
+  --text-meta: 0.75rem;
+  --text-meta--line-height: 1.45;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.65;
+  --text-lede: clamp(1.15rem, 1rem + 0.6vw, 1.375rem);
+  --text-lede--line-height: 1.5;
+  --text-h3: 1.25rem;
+  --text-h3--line-height: 1.35;
+  --text-h2: clamp(1.5rem, 1.2rem + 1.6vw, 2rem);
+  --text-h2--line-height: 1.2;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h1: clamp(2.25rem, 1.4rem + 4.2vw, 3.75rem);
+  --text-h1--line-height: 1.02;
+  --text-h1--letter-spacing: -0.035em;
+
+  --color-paper: var(--c-paper);
+  --color-ink: var(--c-ink);
+  --color-muted: var(--c-muted);
+  --color-rule: var(--c-rule);
+  --color-accent: var(--c-accent);
+}
+
+:root {
+  color-scheme: light;
+  --c-paper: #faf8f5;
+  --c-ink: #14120f;
+  --c-muted: #6f6a63;
+  --c-rule: #e2ddd5;
+  --c-accent: #a8471f;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --c-paper: #12110f;
+  --c-ink: #eae5dd;
+  --c-muted: #8a847b;
+  --c-rule: #2a2723;
+  --c-accent: #e0703f;
+}
+
+@layer base {
+  html {
+    background-color: var(--c-paper);
+    color: var(--c-ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  ::selection {
+    background: var(--c-accent);
+    color: var(--c-paper);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Bracketed inline link — the site's visual signature.
+     The brackets are drawn by pseudo-elements so the label stays a
+     normal string in the markup and accessible names stay clean. */
+  .bracket-link {
+    color: var(--c-ink);
+    text-decoration: none;
+  }
+  .bracket-link::before {
+    content: "[";
+    color: var(--c-muted);
+  }
+  .bracket-link::after {
+    content: "]";
+    color: var(--c-muted);
+  }
+  .bracket-link:hover {
+    color: var(--c-accent);
+  }
+
+  /* Dotted leader between a title and its meta, like a table of contents. */
+  .dot-leader {
+    flex: 1 1 auto;
+    min-width: 1.5rem;
+    border-bottom: 1px dotted var(--c-rule);
+    transform: translateY(-0.25em);
+  }
+
+  /* Reading styles for note bodies (Phase 8 renders markdown into .prose). */
+  .prose {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.72;
+  }
+  .prose > :first-child {
+    margin-top: 0;
+  }
+  .prose p {
+    margin-block: 1.15em;
+  }
+  .prose h2 {
+    font-family: var(--font-sans);
+    font-size: 1.35rem;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    margin-block: 2.2em 0.6em;
+  }
+  .prose h3 {
+    font-family: var(--font-sans);
+    font-size: 1.1rem;
+    margin-block: 1.8em 0.5em;
+  }
+  .prose a {
+    color: var(--c-ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--c-rule);
+  }
+  .prose a:hover {
+    text-decoration-color: var(--c-accent);
+  }
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background: color-mix(in srgb, var(--c-rule) 45%, transparent);
+    padding: 0.12em 0.35em;
+    border-radius: 3px;
+  }
+  .prose pre {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    background: color-mix(in srgb, var(--c-rule) 35%, transparent);
+    padding: 1rem 1.1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin-block: 1.6em;
+  }
+  .prose pre code {
+    background: none;
+    padding: 0;
+  }
+  .prose blockquote {
+    border-left: 2px solid var(--c-rule);
+    padding-left: 1rem;
+    color: var(--c-muted);
+    margin-block: 1.6em;
+  }
+  .prose ul,
+  .prose ol {
+    padding-left: 1.25em;
+    margin-block: 1.15em;
+  }
+  .prose li {
+    margin-block: 0.3em;
+  }
+  .prose hr {
+    border: 0;
+    border-top: 1px solid var(--c-rule);
+    margin-block: 2.4em;
+  }
+  .prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 3px;
+  }
+}

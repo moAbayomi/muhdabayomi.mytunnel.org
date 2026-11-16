@@ -1,0 +1,132 @@
+---
+import Base from "../layouts/Base.astro";
+import BracketedLink from "../components/BracketedLink.astro";
+import NoteList from "../components/NoteList.astro";
+import Backlinks from "../components/Backlinks.astro";
+import SearchFilter from "../components/SearchFilter.astro";
+
+const now = new Date().toISOString();
+
+const sampleNotes = [
+  { slug: "second-brain", title: "Second Brain", kind: "note", updated_at: now, reading_minutes: 4 },
+  { slug: "daydrops", title: "Daydrops", kind: "project", updated_at: now, reading_minutes: 2 },
+  { slug: "thinking", title: "Thinking", kind: "note", updated_at: now, reading_minutes: 3 },
+  { slug: "about", title: "About", kind: "page", updated_at: now, reading_minutes: 1 },
+];
+
+const sampleBacklinks = [
+  { slug: "second-brain", title: "Second Brain" },
+  { slug: "thinking", title: "Thinking" },
+];
+---
+
+<Base title="Styleguide" description="Design tokens and components">
+  <meta slot="head" name="robots" content="noindex" />
+
+  <section>
+    <p class="font-mono text-meta uppercase tracking-[0.18em] text-muted">styleguide</p>
+    <h1 class="mt-3 text-h2">Tokens and components</h1>
+    <p class="mt-4 max-w-prose text-body text-muted">
+      The working surface for the design system: type scale, palette, links, lists,
+      and reading styles. Toggle the theme in the header to check both.
+    </p>
+  </section>
+
+  <section class="mt-16">
+    <h2 class="border-b border-rule pb-2 font-mono text-meta uppercase tracking-[0.18em] text-muted">
+      type
+    </h2>
+    <div class="mt-6 space-y-6">
+      <p class="text-h1">Heading one</p>
+      <p class="text-h2">Heading two — a section title</p>
+      <p class="text-h3">Heading three — a subsection</p>
+      <p class="max-w-prose text-lede">Lede: the opening paragraph of a note, slightly larger than body copy.</p>
+      <p class="max-w-prose text-body">Body: the default reading size. Long-form notes set this in Newsreader; interface copy stays in Instrument Sans.</p>
+      <p class="font-mono text-meta text-muted">meta — timestamps, labels, counts, 12px mono</p>
+    </div>
+  </section>
+
+  <section class="mt-16">
+    <h2 class="border-b border-rule pb-2 font-mono text-meta uppercase tracking-[0.18em] text-muted">
+      palette
+    </h2>
+    <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
+      <div>
+        <div class="h-16 rounded-sm border border-rule bg-paper"></div>
+        <p class="mt-2 font-mono text-meta text-muted">paper</p>
+      </div>
+      <div>
+        <div class="h-16 rounded-sm bg-ink"></div>
+        <p class="mt-2 font-mono text-meta text-muted">ink</p>
+      </div>
+      <div>
+        <div class="h-16 rounded-sm bg-muted"></div>
+        <p class="mt-2 font-mono text-meta text-muted">muted</p>
+      </div>
+      <div>
+        <div class="h-16 rounded-sm bg-rule"></div>
+        <p class="mt-2 font-mono text-meta text-muted">rule</p>
+      </div>
+      <div>
+        <div class="h-16 rounded-sm bg-accent"></div>
+        <p class="mt-2 font-mono text-meta text-muted">accent</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-16">
+    <h2 class="border-b border-rule pb-2 font-mono text-meta uppercase tracking-[0.18em] text-muted">
+      links
+    </h2>
+    <p class="mt-6 max-w-prose text-body">
+      Inline links look like <BracketedLink href="/" label="this" />. In prose they
+      underline instead: <a href="/">a regular link</a>.
+    </p>
+  </section>
+
+  <section class="mt-16">
+    <h2 class="border-b border-rule pb-2 font-mono text-meta uppercase tracking-[0.18em] text-muted">
+      list
+    </h2>
+    <div class="mt-4">
+      <NoteList items={sampleNotes} />
+    </div>
+  </section>
+
+  <section class="mt-16">
+    <h2 class="border-b border-rule pb-2 font-mono text-meta uppercase tracking-[0.18em] text-muted">
+      filter
+    </h2>
+    <div class="mt-4">
+      <SearchFilter />
+    </div>
+  </section>
+
+  <Backlinks links={sampleBacklinks} />
+
+  <section class="mt-16">
+    <h2 class="border-b border-rule pb-2 font-mono text-meta uppercase tracking-[0.18em] text-muted">
+      prose
+    </h2>
+    <article class="prose mt-6 max-w-prose">
+      <p>
+        A note body is set in a serif at roughly 68 characters per line. The serif is
+        the signal that you have moved from interface to reading.
+      </p>
+      <h2>A section heading</h2>
+      <p>
+        Inline <code>code</code> and <a href="/">links</a> sit inside the measure.
+      </p>
+      <blockquote>
+        A pull quote, indented with a hairline rule rather than a colour block.
+      </blockquote>
+      <pre><code>select slug, title
+from notes
+where status = 'published';</code></pre>
+      <ul>
+        <li>Lists keep the same rhythm as paragraphs.</li>
+        <li>Nothing is boxed; separation is whitespace and rules.</li>
+      </ul>
+    </article>
+  </section>
+</Base>

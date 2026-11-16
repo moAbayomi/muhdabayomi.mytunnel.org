@@ -1,0 +1,45 @@
+---
+interface Props {
+  placeholder?: string;
+}
+
+const { placeholder = "filter notes" } = Astro.props;
+---
+
+<div class="flex items-baseline gap-3 border-b border-rule pb-2">
+  <label for="filter" class="font-mono text-meta text-muted">filter</label>
+  <input
+    id="filter"
+    type="search"
+    placeholder={placeholder}
+    data-filter-input
+    autocomplete="off"
+    class="w-full bg-transparent font-mono text-meta text-ink placeholder:text-muted focus:outline-none"
+  />
+</div>
+
+<p data-filter-empty hidden class="mt-4 font-mono text-meta text-muted">
+  nothing matches.
+</p>
+
+<script>
+  const input = document.querySelector<HTMLInputElement>("[data-filter-input]");
+  const items = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-filter-item]"),
+  );
+  const empty = document.querySelector<HTMLElement>("[data-filter-empty]");
+
+  input?.addEventListener("input", () => {
+    const query = input.value.trim().toLowerCase();
+    let shown = 0;
+
+    for (const item of items) {
+      const haystack = (item.textContent ?? "").toLowerCase();
+      const match = query === "" || haystack.includes(query);
+      item.hidden = !match;
+      if (match) shown += 1;
+    }
+
+    if (empty) empty.hidden = shown > 0;
+  });
+</script>

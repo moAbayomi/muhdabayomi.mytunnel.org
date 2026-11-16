@@ -1,0 +1,17 @@
+---
+import Base from "../layouts/Base.astro";
+import BracketedLink from "../components/BracketedLink.astro";
+---
+
+<Base title="404 — not found">
+  <section class="py-16">
+    <p class="font-mono text-meta text-muted">404</p>
+    <h1 class="mt-3 text-h2">Nothing here.</h1>
+    <p class="mt-4 max-w-prose text-body text-muted">
+      That page doesn't exist, or it moved.
+    </p>
+    <p class="mt-10">
+      <BracketedLink href="/" label="back home" />
+    </p>
+  </section>
+</Base>

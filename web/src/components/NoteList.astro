@@ -1,0 +1,40 @@
+---
+export interface NoteListItem {
+  slug: string;
+  title: string;
+  kind: string;
+  updated_at: string;
+  reading_minutes: number;
+}
+
+interface Props {
+  items: NoteListItem[];
+}
+
+const { items } = Astro.props;
+
+const format = new Intl.DateTimeFormat("en-US", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+---
+
+<ul class="divide-y divide-rule">
+  {
+    items.map((item) => (
+      <li data-filter-item>
+        <a
+          href={`/${item.slug}`}
+          class="group flex items-baseline gap-3 py-3 no-underline"
+        >
+          <span class="text-body text-ink group-hover:text-accent">{item.title}</span>
+          <span class="dot-leader" aria-hidden="true" />
+          <span class="shrink-0 font-mono text-meta text-muted">
+            {format.format(new Date(item.updated_at))}
+          </span>
+        </a>
+      </li>
+    ))
+  }
+</ul>
