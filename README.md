@@ -156,6 +156,31 @@ Base path `/v1`. There is no authentication yet (Phase 4); every route below is 
 | `GET` | `/v1/notes/:slug` | note + backlinks + outgoing + children; drafts 404 |
 | `GET` | `/v1/search?q=&lim=&off=` | full-text, ranked; `q` must be ≥ 2 chars |
 | `GET` | `/v1/stats` | one row per kind: count and total reading minutes |
+| `POST` | `/v1/auth/login` | password → `{ token }`; rate-limited per IP |
+
+### Admin
+
+Everything under `/v1/admin/*` requires `Authorization: Bearer <token>`. The
+middleware is mounted on the subtree, so a new admin route is protected by default.
+
+| Method | Path | Notes |
+|---|---|---|
+| `GET` | `/v1/admin/notes?status=&deleted=` | all notes, newest first; `status` is `all`/`draft`/`published`/`archived` |
+| `GET` | `/v1/admin/notes/:id` | full note |
+| `POST` | `/v1/admin/notes` | create; slug derived from the title |
+| `PATCH` | `/v1/admin/notes/:id` | update; optional `updatedAt` for optimistic concurrency |
+| `POST` | `/v1/admin/notes/:id/publish` | `422` if the body is empty |
+| `POST` | `/v1/admin/notes/:id/unpublish` | back to draft; keeps `published_at` |
+| `DELETE` | `/v1/admin/notes/:id` | soft delete, `204` |
+| `POST` | `/v1/admin/notes/:id/restore` | clears `deleted_at` |
+| `GET` | `/v1/admin/notes/:id/links` | `{ outgoing, unresolved }` — includes `[[typos]]` |
+| `GET` | `/v1/admin/notes/:id/revisions` | newest first, with a body preview |
+| `POST` | `/v1/admin/notes/:id/revisions/:revId/restore` | restores that snapshot |
+| `POST` | `/v1/admin/rebuild` | triggers the Pages deploy hook; `503` if unset |
+
+`PATCH` sends back the `updated_at` it last saw. If the note changed since, it gets
+`409 stale_note` with the **current** note in `error.details.current`, so the editor can
+show what it now says instead of a dead end.
 
 Errors come back in one shape, always:
 

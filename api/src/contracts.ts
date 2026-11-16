@@ -80,3 +80,61 @@ export type DirectoryEntry = z.infer<typeof DirectoryEntry>;
 export type WikiStats = z.infer<typeof WikiStats>;
 export type NotePage = z.infer<typeof NotePage>;
 export type SearchResult = z.infer<typeof SearchResult>;
+
+// ─── admin ───────────────────────────────────────────────────────────
+
+export const AdminNoteSummary = z.object({
+  id: z.string().uuid(),
+  slug: z.string(),
+  title: z.string(),
+  kind: NoteKind,
+  status: NoteStatus,
+  published_at: z.string().datetime().nullable(),
+  updated_at: z.string().datetime(),
+  reading_minutes: z.number().int().positive(),
+  deleted_at: z.string().datetime().nullable(),
+});
+
+export const CreateNoteInput = z.object({
+  title: z.string().trim().min(1).max(200),
+  body: z.string().default(""),
+  kind: NoteKind.default("note"),
+  parentSlug: z.string().trim().min(1).nullable().optional(),
+});
+
+export const PatchNoteInput = z
+  .object({
+    title: z.string().trim().min(1).max(200).optional(),
+    body: z.string().optional(),
+    excerpt: z.string().nullable().optional(),
+    kind: NoteKind.optional(),
+    parentSlug: z.string().trim().min(1).nullable().optional(),
+    // Optimistic concurrency token: the updated_at the client last saw.
+    updatedAt: z.string().datetime().optional(),
+  })
+  .refine(
+    (v) =>
+      v.title !== undefined ||
+      v.body !== undefined ||
+      v.excerpt !== undefined ||
+      v.kind !== undefined ||
+      v.parentSlug !== undefined,
+    { message: "No fields to update" },
+  );
+
+export const RevisionSummary = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  status: NoteStatus,
+  created_at: z.string().datetime(),
+  body_preview: z.string(),
+});
+
+export const NoteLinksReport = z.object({
+  outgoing: z.array(NoteLink),
+  unresolved: z.array(z.object({ slug: z.string() })),
+});
+
+export type AdminNoteSummary = z.infer<typeof AdminNoteSummary>;
+export type CreateNoteInput = z.infer<typeof CreateNoteInput>;
+export type PatchNoteInput = z.infer<typeof PatchNoteInput>;

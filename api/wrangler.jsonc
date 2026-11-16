@@ -12,6 +12,7 @@
     "DATABASE_URL": "",
     "ADMIN_PASSWORD": "",
     "AUTH_SECRET": "",
+    "DEPLOY_HOOK_URL": "",
     "ENVIRONMENT": ""
   }
 }
