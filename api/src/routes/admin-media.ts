@@ -55,6 +55,20 @@ function sniff(bytes: Uint8Array): Sniffed | null {
   return null;
 }
 
+// Backs api.admin.listMedia() in web/src/lib/api.ts. Without this the
+// editor's media library would 404 even though the client method exists.
+adminMedia.get("/", async (c) => {
+  const rows = await sql`
+    SELECT id, r2_key, url, mime, bytes::int AS bytes,
+           width, height, alt, created_at
+    FROM media
+    ORDER BY created_at DESC
+    LIMIT 200
+  `;
+
+  return c.json(rows);
+});
+
 adminMedia.post("/", async (c) => {
   // Cheap rejection before buffering the body. The real check is file.size
   // below, since Content-Length can lie or be absent.

@@ -97,7 +97,6 @@ async function request<T extends z.ZodTypeAny>(
   const res = await fetcher(url.toString(), {
     method,
     headers,
-    credentials: "include",
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 

@@ -17,7 +17,7 @@ export async function GET(context: APIContext) {
   return rss({
     title: "Muhd Abayomi — Recently Updated",
     description: "Recently updated notes, pages, and projects from the wiki.",
-    site: context.site ?? "https://mytunnel.org",
+    site: context.site ?? "https://muhdabayomi.mytunnel.org",
     items: sorted.map((entry) => ({
       title: entry.title,
       pubDate: new Date(entry.updated_at),
