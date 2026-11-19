@@ -26,6 +26,12 @@ const canonical = new URL(Astro.url.pathname, SITE);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
 
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Muhd Abayomi — Recently Updated"
+      href="/rss.xml"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

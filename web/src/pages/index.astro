@@ -1,21 +1,107 @@
+
 ---
 import Base from "../layouts/Base.astro";
-import BracketedLink from "../components/BracketedLink.astro";
+import { api } from "../lib/api";
+
+// Fetch stats and the 3 most recently updated entries in parallel
+const [stats, recentPage] = await Promise.all([
+  api.notes.stats(),
+  api.notes.list({ limit: 3 }),
+]);
+
+const recent = recentPage.items
+
+// Aggregate counts from WikiStats[]
+const countByKind = new Map(stats.map((s) => [s.kind, s.note_count]));
+const notesCount = countByKind.get("note") ?? 0;
+const pagesCount = countByKind.get("page") ?? 0;
+const projectsCount = countByKind.get("project") ?? 0;
+const totalMinutes = stats.reduce((sum, s) => sum + s.total_reading_minutes, 0);
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 ---
 
-<Base>
-  <section>
-    <h1 class="text-h1">mo abayomi.</h1>
-    <p class="mt-4 font-mono text-meta text-muted">tinkerer · osun, nigeria</p>
+<Base title="Muhd Abayomi — Software Engineer" description="Personal digital garden, notes, and projects.">
+  <section class="mx-auto max-w-2xl px-6 py-16 sm:py-24">
+    {/* Header: Name, Role & One Paragraph */}
+    <header class="space-y-4">
+      <div class="space-y-1">
+        <h1 class="font-sans text-[length:var(--text-h1)] font-semibold tracking-tight text-ink">
+          Muhd Abayomi
+        </h1>
+        <p class="font-mono text-[length:var(--text-meta)] uppercase tracking-wider text-muted">
+          Software Engineer
+        </p>
+      </div>
 
-    <p class="mt-12 max-w-prose text-lede">
-      I'm a developer building things on the web. This is my wiki: a place for notes,
-      projects, and things I'm still working out.
-    </p>
+      <p class="font-serif text-[length:var(--text-lede)] text-ink/90">
+        I build web systems, developer tools, and small experiments on the edge.
+        This space is a living notebook of things I’m learning, building, and thinking through.
+      </p>
+    </header>
 
-    <p class="mt-6 max-w-prose text-body text-muted">
-      The directory and notes arrive in the next phase. For now,
-      <BracketedLink href="/styleguide" label="the styleguide" /> shows the design system.
-    </p>
+    <hr class="my-12 border-rule" />
+
+    {/* In the wiki: counts */}
+    <section aria-labelledby="wiki-stats-heading" class="space-y-2">
+      <h2
+        id="wiki-stats-heading"
+        class="font-mono text-[length:var(--text-meta)] uppercase tracking-wider text-muted"
+      >
+        In the wiki
+      </h2>
+      <p class="font-mono text-sm text-ink">
+        <span>{notesCount} {notesCount === 1 ? "note" : "notes"}</span>
+        <span class="mx-2 text-muted">·</span>
+        <span>{pagesCount} {pagesCount === 1 ? "page" : "pages"}</span>
+        <span class="mx-2 text-muted">·</span>
+        <span>{projectsCount} {projectsCount === 1 ? "project" : "projects"}</span>
+        <span class="mx-2 text-muted">·</span>
+        <span>{totalMinutes} min read</span>
+      </p>
+    </section>
+
+    {/* Recently updated (3 items, no feed) */}
+    <section aria-labelledby="recent-heading" class="mt-12 space-y-4">
+      <h2
+        id="recent-heading"
+        class="font-mono text-[length:var(--text-meta)] uppercase tracking-wider text-muted"
+      >
+        Recently updated
+      </h2>
+
+      {recent.length === 0 ? (
+        <p class="font-serif text-sm italic text-muted">Nothing published yet.</p>
+      ) : (
+        <ul class="space-y-3">
+          {recent.map((item) => (
+            <li class="flex items-baseline gap-2">
+              <a
+                href={`/${item.slug}`}
+                class="font-serif text-base text-ink transition-colors hover:text-accent"
+              >
+                {item.title}
+              </a>
+              <span class="dot-leader" aria-hidden="true" />
+              <span class="shrink-0 font-mono text-[length:var(--text-meta)] text-muted">
+                {item.kind} · {formatDate(item.updated_at)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div class="pt-4">
+        <a href="/directory" class="bracket-link font-mono text-sm">
+          directory
+        </a>
+      </div>
+    </section>
   </section>
 </Base>

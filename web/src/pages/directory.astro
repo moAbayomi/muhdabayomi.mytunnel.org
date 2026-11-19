@@ -1,0 +1,130 @@
+
+---
+import Base from "../layouts/Base.astro";
+import { api } from "../lib/api";
+
+const rawEntries = await api.notes.directory();
+
+// Ensure alphabetical order by title regardless of SQL ordering
+const entries = [...rawEntries].sort((a, b) =>
+  a.title.localeCompare(b.title, undefined, { sensitivity: "base" }),
+);
+
+const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+function formatRelativeDate(iso: string): string {
+  const diffSeconds = Math.round((new Date(iso).getTime() - Date.now()) / 1000);
+  const absSeconds = Math.abs(diffSeconds);
+
+  if (absSeconds < 60) return rtf.format(diffSeconds, "second");
+  const diffMinutes = Math.round(diffSeconds / 60);
+  if (Math.abs(diffMinutes) < 60) return rtf.format(diffMinutes, "minute");
+  const diffHours = Math.round(diffMinutes / 60);
+  if (Math.abs(diffHours) < 24) return rtf.format(diffHours, "hour");
+  const diffDays = Math.round(diffHours / 24);
+  if (Math.abs(diffDays) < 30) return rtf.format(diffDays, "day");
+  const diffMonths = Math.round(diffDays / 30);
+  if (Math.abs(diffMonths) < 12) return rtf.format(diffMonths, "month");
+  const diffYears = Math.round(diffDays / 365);
+  return rtf.format(diffYears, "year");
+}
+---
+
+<Base title="Directory — Muhd Abayomi" description="Alphabetical index of all published notes, pages, and projects.">
+  <section class="mx-auto max-w-2xl px-6 py-16 sm:py-24">
+    <header class="space-y-4">
+      <div class="flex items-baseline justify-between gap-4">
+        <h1 class="font-sans text-[length:var(--text-h1)] font-semibold tracking-tight text-ink">
+          Directory
+        </h1>
+        <a href="/" class="bracket-link font-mono text-sm">
+          home
+        </a>
+      </div>
+
+      <p class="font-mono text-[length:var(--text-meta)] uppercase tracking-wider text-muted">
+        <span id="directory-count">{entries.length}</span>{" "}
+        <span id="directory-count-label">{entries.length === 1 ? "entry" : "entries"}</span>
+      </p>
+
+      {/* Client-side instant filter (no API call) */}
+      <div class="pt-2">
+        <label for="directory-filter" class="sr-only">
+          Filter directory
+        </label>
+        <input
+          id="directory-filter"
+          type="search"
+          placeholder="Filter by title, slug, or kind…"
+          autocomplete="off"
+          class="w-full border-b border-rule bg-transparent py-2 font-mono text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+        />
+      </div>
+    </header>
+
+    <section class="mt-10" aria-label="Directory entries">
+      {entries.length === 0 ? (
+        <p class="font-serif text-sm italic text-muted">No entries published yet.</p>
+      ) : (
+        <>
+          <ul id="directory-list" class="space-y-3">
+            {entries.map((entry) => (
+              <li
+                data-directory-item
+                data-search={`${entry.title} ${entry.slug} ${entry.kind}`.toLowerCase()}
+                class="flex items-baseline gap-2"
+              >
+                <a
+                  href={`/${entry.slug}`}
+                  class="font-serif text-base text-ink transition-colors hover:text-accent"
+                >
+                  {entry.title}
+                </a>
+                <span class="dot-leader" aria-hidden="true" />
+                <span class="shrink-0 font-mono text-[length:var(--text-meta)] text-muted">
+                  <span>{entry.kind}</span>
+                  <span class="mx-1.5">·</span>
+                  <time datetime={entry.updated_at} title={new Date(entry.updated_at).toUTCString()}>
+                    updated {formatRelativeDate(entry.updated_at)}
+                  </time>
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <p id="directory-empty" hidden class="font-serif text-sm italic text-muted">
+            No matching entries.
+          </p>
+        </>
+      )}
+    </section>
+  </section>
+</Base>
+
+<script>
+  const input = document.getElementById("directory-filter") as HTMLInputElement | null;
+  const items = Array.from(document.querySelectorAll<HTMLElement>("[data-directory-item]"));
+  const countEl = document.getElementById("directory-count");
+  const labelEl = document.getElementById("directory-count-label");
+  const emptyEl = document.getElementById("directory-empty");
+
+  if (input) {
+    const filter = () => {
+      const terms = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      let visible = 0;
+
+      for (const item of items) {
+        const haystack = item.dataset.search ?? "";
+        const matches = terms.every((term) => haystack.includes(term));
+        item.hidden = !matches;
+        if (matches) visible++;
+      }
+
+      if (countEl) countEl.textContent = String(visible);
+      if (labelEl) labelEl.textContent = visible === 1 ? "entry" : "entries";
+      if (emptyEl) emptyEl.hidden = visible > 0 || items.length === 0;
+    };
+
+    input.addEventListener("input", filter);
+  }
+</script>

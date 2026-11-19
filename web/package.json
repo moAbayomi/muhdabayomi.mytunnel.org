@@ -13,12 +13,19 @@
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
+    "@repo/contracts": "workspace:*",
     "@tailwindcss/vite": "^4.3.4",
     "astro": "^7.4.5",
-    "tailwindcss": "^4.3.4"
+    "marked": "^18.2.1",
+    "sanitize-html": "^2.18.2",
+    "shiki": "^4.6.0",
+    "tailwindcss": "^4.3.4",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
+    "@types/node": "^26.6.6",
+    "@types/sanitize-html": "^2.16.2",
     "typescript": "^5.9.3"
   }
 }

@@ -6,6 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   site: "https://muhdabayomi.mytunnel.org",
   output: "static",
+  prefetch: true,
   integrations: [sitemap()],
   vite: {
     plugins: [tailwindcss()],

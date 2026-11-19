@@ -7,8 +7,11 @@ const wikiStats = new Hono<AppEnv>();
 
 wikiStats.get("/", async (c) => {
   const stats = await sql`
-      SELECT * FROM wiki_stats
-    `;
+    SELECT
+          kind,
+          note_count::int AS note_count,
+          total_reading_minutes::int AS total_reading_minutes
+        FROM wiki_stats    `;
 
   return c.json(stats as WikiStats[]);
 });

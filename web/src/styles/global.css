@@ -15,12 +15,14 @@
        @fontsource-variable/jetbrains-mono
    ------------------------------------------------------------------ */
 @theme {
-  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, sans-serif;
-  --font-serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino,
-    Georgia, serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo,
-    monospace;
+  --font-sans:
+    "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+  --font-serif:
+    "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    serif;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
 
   --text-meta: 0.75rem;
   --text-meta--line-height: 1.45;
@@ -204,5 +206,27 @@
     max-width: 100%;
     height: auto;
     border-radius: 3px;
+  }
+
+  /* Unresolved [[slug]] wiki-links */
+  .wiki-link-unresolved {
+    color: var(--c-muted);
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    border-bottom: 1px dashed currentColor;
+    cursor: help;
+  }
+
+  /* Shiki dual-theme tokens (inherits layout/padding from .prose pre) */
+  .prose pre.shiki,
+  .prose pre.shiki span {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+  }
+
+  [data-theme="dark"] .prose pre.shiki,
+  [data-theme="dark"] .prose pre.shiki span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
   }
 }

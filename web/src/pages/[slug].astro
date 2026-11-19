@@ -1,0 +1,176 @@
+
+---
+import type { GetStaticPaths } from "astro";
+import Base from "../layouts/Base.astro";
+import { api } from "../lib/api";
+import { renderMarkdown } from "../lib/markdown";
+import { RESERVED_SLUGS } from "@repo/contracts";
+
+export const getStaticPaths = (async () => {
+  const [directory, allNotes] = await Promise.all([
+    api.notes.directory(),
+    api.notes.list({ limit: 100 }),
+  ]);
+
+  // 8.9 Reserved-slug guard: fail the build loudly on static route collisions
+  const collisions = directory.filter((entry) =>
+    RESERVED_SLUGS.has(entry.slug.toLowerCase()),
+  );
+
+  if (collisions.length > 0) {
+    const list = collisions.map((c) => `"${c.slug}" (${c.title})`).join(", ");
+    throw new Error(
+      `Build aborted: note slug(s) collide with reserved static routes: ${list}`,
+    );
+  }
+
+  const slugMap = Object.fromEntries(
+    directory.map((entry) => [entry.slug, entry.title]),
+  );
+
+  const byId = Object.fromEntries(
+    allNotes.items.map((item) => [item.id, { slug: item.slug, title: item.title }]),
+  );
+
+  return directory.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { slugMap, byId },
+  }));
+}) satisfies GetStaticPaths;
+
+const { slug } = Astro.params;
+const { slugMap, byId } = Astro.props;
+
+const page = await api.notes.getBySlug(slug!);
+const { note, backlinks, outgoing, children } = page;
+const html = await renderMarkdown(note.body, slugMap);
+
+const parent = note.parent_id ? (byId[note.parent_id] ?? null) : null;
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+---
+
+<Base
+  title={`${note.title} — Muhd Abayomi`}
+  description={note.excerpt ?? undefined}
+>
+  <div class="max-w-[68ch]">
+    {/* Breadcrumb: Home / Title */}
+    <nav aria-label="Breadcrumb" class="mb-8 font-mono text-[length:var(--text-meta)] text-muted">
+      <a href="/" class="transition-colors hover:text-accent">Home</a>
+      <span class="mx-2">/</span>
+      <span class="text-ink">{note.title}</span>
+    </nav>
+
+    {/* Header: h1 + mono metadata line */}
+    <header class="space-y-3">
+      <h1 class="font-sans text-[length:var(--text-h1)] font-semibold tracking-tight text-ink">
+        {note.title}
+      </h1>
+
+      <p class="font-mono text-[length:var(--text-meta)] text-muted">
+        <span>updated {formatDate(note.updated_at)}</span>
+        <span class="mx-2">·</span>
+        <span>{note.reading_minutes} min</span>
+        <span class="mx-2">·</span>
+        <span>{note.kind}</span>
+      </p>
+    </header>
+
+    {/* Parent / Children hierarchy */}
+    {(parent || children.length > 0) && (
+      <aside
+        aria-label="Note hierarchy"
+        class="mt-8 space-y-2 border-l-2 border-rule pl-4 font-mono text-[length:var(--text-meta)] text-muted"
+      >
+        {parent && (
+          <div>
+            <span>part of </span>
+            <a
+              href={`/${parent.slug}`}
+              class="text-ink underline decoration-rule underline-offset-4 hover:decoration-accent"
+            >
+              {parent.title}
+            </a>
+          </div>
+        )}
+
+        {children.length > 0 && (
+          <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span>in this section:</span>
+            {children.map((child) => (
+              <a href={`/${child.slug}`} class="bracket-link text-ink">
+                {child.title}
+              </a>
+            ))}
+          </div>
+        )}
+      </aside>
+    )}
+
+    {/* Body in Newsreader at ~68ch */}
+    <article class="prose mt-10" set:html={html} />
+
+    {/* Linked from (backlinks) & Links out (collapsed by default) */}
+    {(backlinks.length > 0 || outgoing.length > 0) && (
+      <footer class="mt-16 space-y-8 border-t border-rule pt-8">
+        {backlinks.length > 0 && (
+          <section aria-labelledby="backlinks-heading" class="space-y-3">
+            <h2
+              id="backlinks-heading"
+              class="font-mono text-[length:var(--text-meta)] uppercase tracking-wider text-muted"
+            >
+              Linked from
+            </h2>
+            <ul class="space-y-2">
+              {backlinks.map((link) => (
+                <li class="flex items-baseline gap-2">
+                  <a
+                    href={`/${link.slug}`}
+                    class="font-serif text-base text-ink transition-colors hover:text-accent"
+                  >
+                    {link.title}
+                  </a>
+                  <span class="dot-leader" aria-hidden="true" />
+                  <span class="shrink-0 font-mono text-[length:var(--text-meta)] text-muted">
+                    /{link.slug}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {outgoing.length > 0 && (
+          <details class="group">
+            <summary class="cursor-pointer select-none font-mono text-[length:var(--text-meta)] uppercase tracking-wider text-muted transition-colors hover:text-ink">
+              Links out ({outgoing.length})
+            </summary>
+            <ul class="mt-3 space-y-2">
+              {outgoing.map((link) => (
+                <li class="flex items-baseline gap-2">
+                  <a
+                    href={`/${link.slug}`}
+                    class="font-serif text-base text-ink transition-colors hover:text-accent"
+                  >
+                    {link.title}
+                  </a>
+                  <span class="dot-leader" aria-hidden="true" />
+                  <span class="shrink-0 font-mono text-[length:var(--text-meta)] text-muted">
+                    /{link.slug}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </footer>
+    )}
+  </div>
+</Base>

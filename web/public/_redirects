@@ -1,0 +1,10 @@
+
+# Feed & convenience aliases
+/feed /rss.xml 301
+/feed.xml /rss.xml 301
+/rss /rss.xml 301
+/atom.xml /rss.xml 301
+
+# Common path aliases
+/notes /directory 301
+/index / 301

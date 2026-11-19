@@ -18,6 +18,7 @@
     "@hono/structured-logger": "^1.0.0",
     "@hono/zod-validator": "^0.9.1",
     "@neondatabase/serverless": "^1.2.0",
+    "@repo/contracts": "workspace:*",
     "hono": "^4.13.16",
     "postgres": "^4.1.0",
     "zod": "^4.6.7"
