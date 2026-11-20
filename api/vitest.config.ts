@@ -22,6 +22,10 @@ export default defineConfig({
           ADMIN_PASSWORD: ["test", "only"].join("-"),
           AUTH_SECRET: btoa(["test", "only", "placeholder"].join("-")),
           ENVIRONMENT: "test",
+          // Critical: .dev.vars may contain REAL values. Blank the ones that
+          // change behaviour so tests never hit a live deploy hook or R2 URL.
+          DEPLOY_HOOK_URL: "",
+          R2_PUBLIC_URL: "",
         },
       },
     }),

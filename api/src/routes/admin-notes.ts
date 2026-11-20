@@ -159,6 +159,10 @@ adminNotes.patch(
           );
         }
         parentId = parents[0].id;
+
+        if (parentId === id) {
+          throw new AppError(422, "invalid_parent", "A note cannot be its own parent");
+        }
       }
     }
 

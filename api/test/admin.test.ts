@@ -20,6 +20,7 @@ type Note = {
   slug: string;
   title: string;
   body: string;
+  kind: string;
   status: string;
   updated_at: string;
   reading_minutes: number;
@@ -140,6 +141,65 @@ describe("create and update", () => {
   it("404s a non-uuid id", async () => {
     const res = await authed("/v1/admin/notes/not-a-uuid");
     expect(res.status).toBe(404);
+  });
+});
+
+describe("hierarchy: kinds and parents", () => {
+  it("creates a page with a child note, and the parent lists the child", async () => {
+    const hubRes = await authed("/v1/admin/notes", {
+      method: "POST",
+      body: JSON.stringify({
+        title: "TEST series hub",
+        body: "hub body",
+        kind: "page",
+      }),
+    });
+    expect(hubRes.status).toBe(201);
+
+    const hub = (await hubRes.json<Note>()) as Note;
+    expect(hub.kind).toBe("page");
+
+    const childRes = await authed("/v1/admin/notes", {
+      method: "POST",
+      body: JSON.stringify({
+        title: "TEST series child",
+        body: "child body",
+        kind: "note",
+        parentSlug: hub.slug,
+      }),
+    });
+    expect(childRes.status).toBe(201);
+
+    const child = (await childRes.json<Note>()) as Note;
+    expect(child.parent_id).toBe(hub.id);
+    expect(child.kind).toBe("note");
+
+    // note_page() only lists published children.
+    await authed(`/v1/admin/notes/${hub.id}/publish`, { method: "POST" });
+    await authed(`/v1/admin/notes/${child.id}/publish`, { method: "POST" });
+
+    const pageRes = await authed(`/v1/notes/${hub.slug}`);
+    expect(pageRes.status).toBe(200);
+
+    const page = (await pageRes.json<{
+      children: { id: string; title: string }[];
+    }>()) as { children: { id: string; title: string }[] };
+
+    expect(page.children.some((entry) => entry.id === child.id)).toBe(true);
+  });
+
+  it("rejects a note becoming its own parent", async () => {
+    const note = await createNote("TEST self parent", "body");
+
+    const res = await authed(`/v1/admin/notes/${note.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ parentSlug: note.slug, updatedAt: note.updated_at }),
+    });
+
+    expect(res.status).toBe(422);
+    expect((await res.json<{ error: { code: string } }>()).error.code).toBe(
+      "invalid_parent",
+    );
   });
 });
 
