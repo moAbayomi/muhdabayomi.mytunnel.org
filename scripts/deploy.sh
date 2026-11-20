@@ -33,14 +33,14 @@ if ! "$WRANGLER" whoami >/dev/null 2>&1; then
   exit 1
 fi
 
-read -rp "site origin [https://muhdabayomi.mytunnel.org]: " WEB_ORIGIN
-WEB_ORIGIN="${WEB_ORIGIN:-https://muhdabayomi.mytunnel.org}"
+read -rp "site origin [https://moyomi.xyz]: " WEB_ORIGIN
+WEB_ORIGIN="${WEB_ORIGIN:-https://moyomi.xyz}"
 
 echo "API URL used at build time. On the first deploy the custom API domain may"
 echo "not resolve yet; use the Worker's *.workers.dev URL, then redeploy the site"
 echo "after attaching the domain."
-read -rp "api url [https://api.muhdabayomi.mytunnel.org]: " PUBLIC_API_URL
-PUBLIC_API_URL="${PUBLIC_API_URL:-https://api.muhdabayomi.mytunnel.org}"
+read -rp "api url [https://api.moyomi.xyz]: " PUBLIC_API_URL
+PUBLIC_API_URL="${PUBLIC_API_URL:-https://api.moyomi.xyz}"
 
 read -rp "pages project [wiki-web]: " PAGES_PROJECT
 PAGES_PROJECT="${PAGES_PROJECT:-wiki-web}"

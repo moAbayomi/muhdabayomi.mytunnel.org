@@ -1,4 +1,4 @@
-# muhdabayomi.mytunnel.org
+# moyomi.xyz
 
 A personal wiki. Notes live in Postgres, link to each other with `[[double brackets]]`,
 and are published as a static site. There is no feed and no "posted on" — every public
@@ -10,6 +10,9 @@ knowledge base with a `published` filter and a static build on top.
 A longer write-up — why the old Express/EC2 site was replaced, what the wiki model buys,
 and the mistakes worth not repeating — is in
 [`docs/case-study.md`](./docs/case-study.md).
+
+What `page`, `project` and `note` mean, and how to group notes into series with a
+parent, is in [`docs/model.md`](./docs/model.md).
 
 **Status: Phases 0–10 complete; Phase 11 (deploy) pending.** The API, schema, media,
 site, sketches and editor all build and are tested locally. What remains is creating the
@@ -261,8 +264,8 @@ deploy hook, and the GitHub secrets/variables.
 
 CI lives in `.github/workflows/deploy.yml`:
 
-- **api** — typecheck, run the 38 integration tests against a Neon branch
-  (`DATABASE_URL_TEST`), then `wrangler deploy` with `WEB_ORIGIN` set to the site origin.
+- **api** — typecheck, optionally run the 38 integration tests if `DATABASE_URL_TEST`
+  is set, then `wrangler deploy` with `WEB_ORIGIN` set to the site origin.
 - **web** — build with `PUBLIC_API_URL`, then upload `web/dist` to Cloudflare Pages.
 
 The web build fetches published notes at build time, so the API must be deployed and

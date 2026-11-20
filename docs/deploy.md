@@ -10,7 +10,9 @@ cd api && ./node_modules/.bin/wrangler login   # once
 cd .. && ./scripts/deploy.sh
 ```
 
-`scripts/deploy.sh` creates the R2 bucket, prompts for the Worker secrets (hidden
+`scripts/deploy.sh` is a plain bash script — not part of Astro. It runs the
+`wrangler` and `pnpm` commands from this runbook in order; open it and read it
+before running it. It creates the R2 bucket, prompts for the Worker secrets (hidden
 input), applies migrations, deploys the Worker, creates the Pages project, builds and
 deploys the site. It cannot attach custom domains/DNS or create the Pages deploy
 hook — those are steps 3–5 below.
@@ -41,15 +43,17 @@ reachable before the web job runs. The workflow enforces this with `needs: api`.
 
    `0017_seed.sql` inserts the seed notes; it is idempotent. On a database that
    already has content it is a no-op.
-3. Create a **second branch** for CI (or a second database) and copy its URL —
-   this is `DATABASE_URL_TEST`. Tests create and delete notes; never point them
-   at production.
+3. **Optional:** create a second Neon branch (or a local dev database) and set
+   `DATABASE_URL_TEST`. The integration tests create and delete notes, so they
+   must never run against production. If that secret is absent, CI skips the
+   tests and still deploys — run them yourself with `pnpm --filter api test`
+   against a dev database.
 
 ## 2. R2
 
 1. Create a bucket named `wiki-media` (or change `bucket_name` in
    `api/wrangler.jsonc`).
-2. Enable a public URL — a custom domain (`media.muhdabayomi.mytunnel.org`) or
+2. Enable a public URL — a custom domain (`media.moyomi.xyz`) or
    `r2.dev` for now. Note the base URL; it becomes `R2_PUBLIC_URL`.
 3. Uploads are served through `R2_PUBLIC_URL` when set, otherwise through
    `/v1/media/<key>`.
@@ -77,18 +81,18 @@ Deploy once by hand to confirm:
 
 ```bash
 cd api
-wrangler deploy --var WEB_ORIGIN:https://muhdabayomi.mytunnel.org
+wrangler deploy --var WEB_ORIGIN:https://moyomi.xyz
 curl https://blog-api.<your-subdomain>.workers.dev/v1/health
 ```
 
-Then attach the custom domain `api.muhdabayomi.mytunnel.org` in the Workers
+Then attach the custom domain `api.moyomi.xyz` in the Workers
 dashboard and update `WEB_ORIGIN` in the workflow variables to the site origin.
 
 ## 4. Cloudflare Pages
 
 1. Create a project (Direct Upload is fine; CI uploads the build).
 2. Project name → the `PAGES_PROJECT` GitHub variable.
-3. Custom domain → `muhdabayomi.mytunnel.org`.
+3. Custom domain → `moyomi.xyz`.
 4. The Pages project needs no build command of its own; the workflow builds.
 
 ## 5. Deploy hook
@@ -108,14 +112,14 @@ the site just does not refresh.
 |---|---|
 | `CLOUDFLARE_API_TOKEN` | token with Workers + Pages + R2 edit |
 | `CLOUDFLARE_ACCOUNT_ID` | from the Cloudflare dashboard |
-| `DATABASE_URL_TEST` | Neon **dev branch** connection string |
+| `DATABASE_URL_TEST` | *(optional)* Neon dev branch or local dev database — tests create/delete rows |
 
 **Variables** (Settings → Variables → Actions):
 
 | Name | Value |
 |---|---|
-| `WEB_ORIGIN` | `https://muhdabayomi.mytunnel.org` |
-| `PUBLIC_API_URL` | `https://api.muhdabayomi.mytunnel.org` |
+| `WEB_ORIGIN` | `https://moyomi.xyz` |
+| `PUBLIC_API_URL` | `https://api.moyomi.xyz` |
 | `PAGES_PROJECT` | the Pages project name |
 
 The first push to `main` runs `.github/workflows/deploy.yml`.

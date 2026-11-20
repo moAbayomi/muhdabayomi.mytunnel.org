@@ -1,5 +1,6 @@
 import { api, ApiError } from "../../lib/api";
 import { renderPreview } from "../../lib/preview";
+import type { NoteKind } from "@repo/contracts";
 
 type AdminNote = Awaited<ReturnType<typeof api.admin.listNotes>>[number];
 type FullNote = Awaited<ReturnType<typeof api.admin.getNote>>;
@@ -29,6 +30,8 @@ const deleteButton = $<HTMLButtonElement>("[data-delete]");
 const imageInput = $<HTMLInputElement>("[data-image]");
 const linkSelect = $<HTMLSelectElement>("[data-link-select]");
 const insertLinkButton = $<HTMLButtonElement>("[data-insert-link]");
+const kindSelect = $<HTMLSelectElement>("[data-kind]");
+const parentSelect = $<HTMLSelectElement>("[data-parent]");
 
 const TOKEN_KEY = "wiki_admin_token";
 const DRAFT_KEY = "wiki_admin_draft";
@@ -74,6 +77,7 @@ async function refresh() {
   const directory: Directory = await api.notes.directory();
   titles = Object.fromEntries(directory.map((entry) => [entry.slug, entry.title]));
   populateLinks(directory);
+  populateParents();
   renderList();
 }
 
@@ -120,6 +124,16 @@ async function selectNote(note: AdminNote) {
     const full: FullNote = await api.admin.getNote(note.id, token);
     currentId = full.id;
     currentUpdatedAt = full.updated_at;
+
+    populateParents();
+    if (kindSelect) kindSelect.value = full.kind;
+    if (parentSelect) {
+      const parent = full.parent_id
+        ? notes.find((candidate) => candidate.id === full.parent_id)
+        : undefined;
+      parentSelect.value = parent?.slug ?? "";
+    }
+
     if (titleInput) titleInput.value = full.title;
     if (bodyInput) bodyInput.value = full.body;
     if (metaEl) {
@@ -135,8 +149,11 @@ async function selectNote(note: AdminNote) {
 function newNote() {
   currentId = null;
   currentUpdatedAt = null;
+  populateParents();
   if (titleInput) titleInput.value = "";
   if (bodyInput) bodyInput.value = "";
+  if (kindSelect) kindSelect.value = "note";
+  if (parentSelect) parentSelect.value = "";
   if (metaEl) metaEl.textContent = "new";
   say("");
   titleInput?.focus();
@@ -145,6 +162,8 @@ function newNote() {
 async function save(): Promise<boolean> {
   const title = titleInput?.value.trim() ?? "";
   const body = bodyInput?.value ?? "";
+  const kind = (kindSelect?.value ?? "note") as NoteKind;
+  const parentSlug = parentSelect?.value ? parentSelect.value : null;
 
   if (!title) {
     say("a title is required", true);
@@ -155,13 +174,16 @@ async function save(): Promise<boolean> {
     if (currentId) {
       const updated = await api.admin.patchNote(
         currentId,
-        { title, body, updatedAt: currentUpdatedAt ?? undefined },
+        { title, body, kind, parentSlug, updatedAt: currentUpdatedAt ?? undefined },
         token,
       );
       currentUpdatedAt = updated.updated_at;
       if (metaEl) metaEl.textContent = `${updated.status} · saved`;
     } else {
-      const created = await api.admin.createNote({ title, body }, token);
+      const created = await api.admin.createNote(
+        { title, body, kind, parentSlug },
+        token,
+      );
       currentId = created.id;
       currentUpdatedAt = created.updated_at;
       if (metaEl) metaEl.textContent = `${created.status} · created`;
@@ -309,6 +331,29 @@ function populateLinks(directory: Directory) {
     option.textContent = entry.title;
     linkSelect.appendChild(option);
   }
+}
+
+/**
+ * The parent picker lists every note except the one being edited, so a note
+ * can never become its own parent. Preserves the current selection across
+ * refreshes.
+ */
+function populateParents() {
+  if (!parentSelect) return;
+
+  const selected = parentSelect.value;
+  parentSelect.innerHTML = '<option value="">— none —</option>';
+
+  for (const note of notes) {
+    if (note.id === currentId) continue;
+
+    const option = document.createElement("option");
+    option.value = note.slug;
+    option.textContent = `${note.title} · ${note.kind}`;
+    parentSelect.appendChild(option);
+  }
+
+  parentSelect.value = selected;
 }
 
 function saveDraft() {

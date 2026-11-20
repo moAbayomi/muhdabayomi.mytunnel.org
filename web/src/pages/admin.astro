@@ -49,6 +49,30 @@ import Base from "../layouts/Base.astro";
           class="w-full border-b border-rule bg-transparent py-2 font-sans text-h3 text-ink focus:border-accent focus:outline-none"
         />
 
+        <div class="flex flex-wrap items-center gap-6 font-mono text-meta text-muted">
+          <label class="flex items-center gap-2">
+            kind
+            <select
+              data-kind
+              class="border border-rule bg-transparent px-1 py-0.5 text-ink"
+            >
+              <option value="note">note</option>
+              <option value="page">page</option>
+              <option value="project">project</option>
+            </select>
+          </label>
+
+          <label class="flex items-center gap-2">
+            parent
+            <select
+              data-parent
+              class="border border-rule bg-transparent px-1 py-0.5 text-ink"
+            >
+              <option value="">— none —</option>
+            </select>
+          </label>
+        </div>
+
         <div class="flex flex-wrap items-center gap-4 font-mono text-meta text-muted">
           <span data-meta>new</span>
           <button type="button" data-preview-toggle class="cursor-pointer hover:text-ink">

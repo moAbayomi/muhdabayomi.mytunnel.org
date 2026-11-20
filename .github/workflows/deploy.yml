@@ -30,17 +30,35 @@ jobs:
       - name: Typecheck
         run: pnpm --filter api check
 
-      # Tests run against a Neon branch, never the production database.
-      # Prefer a dedicated DATABASE_URL_TEST secret pointing at a dev branch.
+      # Tests are optional. They create and delete rows, so they must never run
+      # against production. If DATABASE_URL_TEST is set (a Neon branch or a
+      # local dev database), run them; otherwise deploy still proceeds.
+      - name: Check for a test database
+        id: testdb
+        run: |
+          if [ -n "$DATABASE_URL_TEST" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
+
       - name: Write test env
+        if: steps.testdb.outputs.available == 'true'
         run: printf 'DATABASE_URL=%s\n' "$DATABASE_URL_TEST" > api/.dev.vars
         env:
           DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
 
       - name: Migrate test database and run tests
+        if: steps.testdb.outputs.available == 'true'
         run: |
           pnpm --filter api db:migrate
           pnpm --filter api test
+
+      - name: Tests skipped
+        if: steps.testdb.outputs.available != 'true'
+        run: echo "No DATABASE_URL_TEST secret - skipping integration tests."
 
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3

@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://muhdabayomi.mytunnel.org
+Sitemap: https://moyomi.xyz
