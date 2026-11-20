@@ -7,15 +7,21 @@
   "observability": {
     "enabled": true
   },
+
+  // Non-sensitive defaults only. Everything else is a secret:
+  //   wrangler secret put DATABASE_URL
+  //   wrangler secret put ADMIN_PASSWORD
+  //   wrangler secret put AUTH_SECRET
+  //   wrangler secret put DEPLOY_HOOK_URL
+  //   wrangler secret put WEB_ORIGIN          (production origin)
+  //   wrangler secret put R2_PUBLIC_URL
+  // Locally these live in api/.dev.vars. Never put secrets in `vars`: an
+  // empty string here will ship as an empty string if the secret is missing.
   "vars": {
     "WEB_ORIGIN": "http://localhost:4321",
-    "DATABASE_URL": "",
-    "ADMIN_PASSWORD": "",
-    "AUTH_SECRET": "",
-    "DEPLOY_HOOK_URL": "",
-    "R2_PUBLIC_URL": "",
-    "ENVIRONMENT": ""
+    "ENVIRONMENT": "development"
   },
+
   "r2_buckets": [
     {
       "binding": "MEDIA_BUCKET",

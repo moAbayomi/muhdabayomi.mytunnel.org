@@ -6,7 +6,11 @@ export default defineConfig({
   // an admin test that publishes a note would otherwise race the public
   // directory assertions in api.test.ts.
   test: {
+    // Tests share one Neon database and are integration tests, not unit tests:
+    // a round trip is 300–800 ms, so the 5 s default is too tight on a slow day.
     fileParallelism: false,
+    testTimeout: 20_000,
+    hookTimeout: 20_000,
   },
   plugins: [
     cloudflareTest({

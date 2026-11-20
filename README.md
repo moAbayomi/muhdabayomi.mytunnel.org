@@ -7,8 +7,10 @@ page is a note, the directory is alphabetical, and each note shows what links to
 The model is [Patrik Arvidsson's site](https://patrikarvidsson.com/): a private
 knowledge base with a `published` filter and a static build on top.
 
-**Status: Phase 3 of 13.** The API serves public reads; the web app is still the Astro
-skeleton. See [`plan.md`](./plan.md) for the remaining phases.
+**Status: Phases 0–10 complete; Phase 11 (deploy) pending.** The API, schema, media,
+site, sketches and editor all build and are tested locally. What remains is creating the
+Cloudflare/Neon resources — see [`docs/deploy.md`](./docs/deploy.md) — and pushing to
+`main` to run CI. [`plan.md`](./plan.md) has the full phase list.
 
 ---
 
@@ -248,15 +250,34 @@ excluded, search results).
 
 ---
 
+## Deploy
+
+[`docs/deploy.md`](./docs/deploy.md) is the runbook: Neon, R2, Worker secrets, Pages, the
+deploy hook, and the GitHub secrets/variables.
+
+CI lives in `.github/workflows/deploy.yml`:
+
+- **api** — typecheck, run the 38 integration tests against a Neon branch
+  (`DATABASE_URL_TEST`), then `wrangler deploy` with `WEB_ORIGIN` set to the site origin.
+- **web** — build with `PUBLIC_API_URL`, then upload `web/dist` to Cloudflare Pages.
+
+The web build fetches published notes at build time, so the API must be deployed and
+reachable first; the workflow enforces that with `needs: api`.
+
+---
+
 ## Known gaps
 
-- **`web/` is still the Astro hello world.** Pages, design system and p5.js are Phases 7–9.
-- **No auth.** Reading is public; there is no write path yet (Phase 4).
+- **Not deployed yet.** No Pages project, Worker, R2 bucket, or deploy hook exists.
+  `docs/deploy.md` is the runbook.
+- **The build requires a reachable API.** If Neon or the Worker is down, `astro build`
+  fails rather than shipping stale notes. A fixture fallback was considered and
+  deliberately deferred.
 - **`astro check` is broken on Node 24** via `@astrojs/check` →
-  `@emnapi/runtime@2.0.0-beta.2`, and Astro misreports the crash as "package not
-  installed". `pnpm --filter web check` therefore runs `astro build`; `typecheck` is the
-  real command for when upstream fixes it.
-- **Nothing is deployed.** No Pages project, no Worker, no secrets, no CI yet (Phase 11).
+  `@emnapi/runtime@2.0.0-beta.2`. `pnpm --filter web check` runs `astro build`;
+  `typecheck` is the real command when upstream fixes it.
+- **Editor flows are not covered by automated tests.** The API endpoints behind them are
+  (38 tests), but login → edit → upload → publish is verified by hand.
 - **Phase 0 is still open** — the old EC2 instance may still be billing. `docs/decisions.md`
   has the checklist.
 
@@ -265,5 +286,6 @@ excluded, search results).
 ## Roadmap
 
 `plan.md` is the source of truth: 13 phases, each ending in a checkpoint with the exact
-commands used to audit it. Next up is Phase 4 (auth), then the admin CRUD, then the site
-itself.
+commands used to audit it. Phases 0–10 are complete; Phase 11 is the deploy runbook, and
+Phase 12 is the stretch list (pinned GitHub repos, link unfurls, search UI, per-note OG
+images, analytics).

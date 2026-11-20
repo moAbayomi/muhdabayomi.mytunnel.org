@@ -1,0 +1,83 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: api — check, test, deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter api check
+
+      # Tests run against a Neon branch, never the production database.
+      # Prefer a dedicated DATABASE_URL_TEST secret pointing at a dev branch.
+      - name: Write test env
+        run: printf 'DATABASE_URL=%s\n' "$DATABASE_URL_TEST" > api/.dev.vars
+        env:
+          DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
+
+      - name: Migrate test database and run tests
+        run: |
+          pnpm --filter api db:migrate
+          pnpm --filter api test
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: api
+          command: deploy --var WEB_ORIGIN:${{ vars.WEB_ORIGIN }}
+
+  web:
+    name: web — build, deploy to Pages
+    needs: api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # The build fetches published notes from the deployed API, so this job
+      # must run after `api` (needs: api) and PUBLIC_API_URL must be reachable.
+      - name: Build
+        run: pnpm --filter web build
+        env:
+          PUBLIC_API_URL: ${{ vars.PUBLIC_API_URL }}
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web/dist --project-name=${{ vars.PAGES_PROJECT }}
