@@ -4,6 +4,44 @@ Reverse-chronological. One entry per decision that would be expensive to undo.
 
 ---
 
+## 2026-11-20 — Secrets are set out-of-band, never in `vars`
+
+**Context:** `wrangler.jsonc` declared `DATABASE_URL`, `ADMIN_PASSWORD`, `AUTH_SECRET`,
+`DEPLOY_HOOK_URL` and `R2_PUBLIC_URL` as empty `vars`, so the generated types would exist.
+
+**Decision:** remove them from `vars`. Declare the bindings explicitly in
+`api/src/env.ts`, and set the values with `wrangler secret put` in production and
+`api/.dev.vars` locally.
+
+**Why:** an empty `vars` entry ships as an empty string when the secret is missing. Auth
+then compares against `""` — locking everyone out, or worse, accepting an empty password
+if the validation ever relaxes. A missing secret should fail loudly, not silently.
+
+**Consequence:** `wrangler types` no longer drives the app's types; `Env` is the source of
+truth. CI writes a temporary `.dev.vars` containing only the test database URL.
+
+---
+
+## 2026-11-20 — Deploy topology and ordering
+
+**Decision:** Cloudflare Pages hosts `web/`; a Worker hosts `api/`; Neon holds data; R2
+holds images. `.github/workflows/deploy.yml` runs the API job first (typecheck → migrate
+and test a Neon branch → `wrangler deploy`), then the web job (`needs: api`) builds with
+`PUBLIC_API_URL` and uploads `web/dist`.
+
+**Why order matters:** the web build fetches published notes at build time, so the API
+must be deployed and reachable before Pages can build. Two independent workflows would
+race.
+
+**Trade-off:** a deploy fails if the API or Neon is unreachable, rather than shipping a
+snapshot. That is deliberate: for a wiki, stale content that looks live is worse than a
+failed build.
+
+**Open:** `DATABASE_URL_TEST` must point at a Neon branch, never production — the test
+suite creates and deletes notes.
+
+---
+
 ## 2026-11-09 — The site is a wiki, not a blog
 
 **Context:** reference sites — `patrikarvidsson.com`, `williamjansson.com`,
