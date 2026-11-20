@@ -1,0 +1,103 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Editor" description="Private editor">
+  <meta slot="head" name="robots" content="noindex" />
+  <meta slot="head" name="theme-color" content="#faf8f5" />
+  <link slot="head" rel="manifest" href="/manifest.webmanifest" />
+
+  <section class="py-10">
+    <header class="flex items-baseline justify-between border-b border-rule pb-4">
+      <h1 class="text-h3">editor</h1>
+      <div class="flex items-baseline gap-4 font-mono text-meta text-muted">
+        <a href="/" class="hover:text-ink">site</a>
+        <button type="button" data-logout hidden class="cursor-pointer hover:text-ink">
+          log out
+        </button>
+      </div>
+    </header>
+
+    <form data-login class="mt-10 max-w-sm space-y-4">
+      <label for="admin-password" class="block font-mono text-meta text-muted">
+        password
+      </label>
+      <input
+        id="admin-password"
+        data-password
+        type="password"
+        autocomplete="current-password"
+        class="w-full border-b border-rule bg-transparent py-2 font-mono text-sm text-ink focus:border-accent focus:outline-none"
+      />
+      <button type="submit" class="bracket-link font-mono text-sm">unlock</button>
+      <p data-login-error hidden class="font-mono text-meta text-accent"></p>
+    </form>
+
+    <div data-app hidden class="mt-8 grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <aside class="space-y-4">
+        <button type="button" data-new class="bracket-link font-mono text-sm">
+          new note
+        </button>
+        <ul data-list class="space-y-1 font-mono text-meta"></ul>
+        <p data-status class="font-mono text-meta text-muted"></p>
+      </aside>
+
+      <form data-editor class="space-y-4">
+        <input
+          data-title
+          placeholder="title"
+          class="w-full border-b border-rule bg-transparent py-2 font-sans text-h3 text-ink focus:border-accent focus:outline-none"
+        />
+
+        <div class="flex flex-wrap items-center gap-4 font-mono text-meta text-muted">
+          <span data-meta>new</span>
+          <button type="button" data-preview-toggle class="cursor-pointer hover:text-ink">
+            preview
+          </button>
+        </div>
+
+        <textarea
+          data-body
+          rows="18"
+          placeholder="markdown… use [[other-note]] to link"
+          class="w-full resize-y border border-rule bg-transparent p-3 font-mono text-sm text-ink focus:border-accent focus:outline-none"
+        ></textarea>
+
+        <div data-preview hidden class="prose max-w-none border border-rule p-4"></div>
+
+        <div class="flex flex-wrap items-center gap-4 font-mono text-meta">
+          <button type="submit" class="cursor-pointer hover:text-accent">save</button>
+          <button type="button" data-publish class="cursor-pointer hover:text-accent">
+            publish
+          </button>
+          <button type="button" data-unpublish class="cursor-pointer hover:text-accent">
+            unpublish
+          </button>
+          <button type="button" data-delete class="cursor-pointer hover:text-accent">
+            delete
+          </button>
+
+          <label class="cursor-pointer hover:text-accent">
+            image
+            <input data-image type="file" accept="image/*" class="hidden" />
+          </label>
+
+          <select
+            data-link-select
+            aria-label="Insert a wiki link"
+            class="border border-rule bg-transparent px-1 py-0.5 text-meta"
+          ></select>
+          <button type="button" data-insert-link class="cursor-pointer hover:text-accent">
+            insert [[link]]
+          </button>
+        </div>
+
+        <p data-message class="font-mono text-meta text-muted"></p>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import "../scripts/admin/index";
+</script>

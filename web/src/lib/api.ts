@@ -116,6 +116,16 @@ async function request<T extends z.ZodTypeAny>(
 // ─── Public Wiki / Notes API (/v1/*) ─────────────────────────────────
 
 export const api = {
+  auth: {
+    login: (password: string, fetcher?: typeof fetch) =>
+      request("/v1/auth/login", {
+        method: "POST",
+        body: { password },
+        schema: z.object({ token: z.string() }),
+        fetcher,
+      }),
+  },
+
   notes: {
     list: (
       params?: {
@@ -168,6 +178,13 @@ export const api = {
         fetcher,
       }),
 
+    getNote: (id: string, token?: string, fetcher?: typeof fetch) =>
+      request(`/v1/admin/notes/${encodeURIComponent(id)}`, {
+        schema: Note,
+        token,
+        fetcher,
+      }),
+
     createNote: (
       input: CreateNoteInput,
       token?: string,
@@ -216,6 +233,72 @@ export const api = {
     listMedia: (token?: string, fetcher?: typeof fetch) =>
       request("/v1/admin/media", {
         schema: z.array(Media),
+        token,
+        fetcher,
+      }),
+
+    publish: (id: string, token?: string, fetcher?: typeof fetch) =>
+      request(`/v1/admin/notes/${encodeURIComponent(id)}/publish`, {
+        method: "POST",
+        schema: Note,
+        token,
+        fetcher,
+      }),
+
+    unpublish: (id: string, token?: string, fetcher?: typeof fetch) =>
+      request(`/v1/admin/notes/${encodeURIComponent(id)}/unpublish`, {
+        method: "POST",
+        schema: Note,
+        token,
+        fetcher,
+      }),
+
+    remove: (id: string, token?: string, fetcher?: typeof fetch) =>
+      request(`/v1/admin/notes/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        schema: z.unknown(),
+        token,
+        fetcher,
+      }),
+
+    restore: (id: string, token?: string, fetcher?: typeof fetch) =>
+      request(`/v1/admin/notes/${encodeURIComponent(id)}/restore`, {
+        method: "POST",
+        schema: Note,
+        token,
+        fetcher,
+      }),
+
+    /** Multipart upload: do not set Content-Type, the browser sets the boundary. */
+    upload: async (
+      file: Blob,
+      filename: string,
+      token?: string,
+      fetcher: typeof fetch = fetch,
+    ): Promise<z.infer<typeof Media>> => {
+      const form = new FormData();
+      form.append("file", file, filename);
+      form.append("alt", filename);
+
+      const res = await fetcher(
+        new URL("/v1/admin/media", API_BASE).toString(),
+        {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: form,
+        },
+      );
+
+      if (!res.ok) {
+        throw new ApiError(res.status, res.statusText, await res.json().catch(() => undefined));
+      }
+      return Media.parse(await res.json());
+    },
+
+    rebuild: (token?: string, fetcher?: typeof fetch) =>
+      request("/v1/admin/rebuild", {
+        method: "POST",
+        schema: z.object({ triggered: z.boolean() }),
         token,
         fetcher,
       }),
