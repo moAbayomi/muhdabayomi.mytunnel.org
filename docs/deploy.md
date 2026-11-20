@@ -3,6 +3,18 @@
 Everything here is done from **your** machine or the Cloudflare/Neon/GitHub
 dashboards. The repository is ready for it; these are the account steps.
 
+## Fast path
+
+```bash
+cd api && ./node_modules/.bin/wrangler login   # once
+cd .. && ./scripts/deploy.sh
+```
+
+`scripts/deploy.sh` creates the R2 bucket, prompts for the Worker secrets (hidden
+input), applies migrations, deploys the Worker, creates the Pages project, builds and
+deploys the site. It cannot attach custom domains/DNS or create the Pages deploy
+hook — those are steps 3–5 below.
+
 ## What gets deployed
 
 | Piece | Where | How |
