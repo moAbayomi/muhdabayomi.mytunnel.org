@@ -1,0 +1,127 @@
+---
+import { ROTATION_DAYS, sketches } from "../sketches";
+---
+
+<section class="mb-12" data-sketch aria-label="generative sketch">
+  <div
+    class="h-[140px] w-full overflow-hidden sm:h-[180px]"
+    data-sketch-host
+    aria-hidden="true"
+  >
+  </div>
+  <p class="mt-2 font-mono text-[length:var(--text-meta)] text-muted" data-sketch-caption>
+    sketch — {sketches.length} in rotation · changes every {ROTATION_DAYS} days
+  </p>
+</section>
+
+<script>
+  import { loadActiveSketch, ROTATION_DAYS } from "../sketches";
+
+  const root = document.querySelector<HTMLElement>("[data-sketch]");
+  const host = document.querySelector<HTMLElement>("[data-sketch-host]");
+  const caption = document.querySelector<HTMLElement>("[data-sketch-caption]");
+
+  if (root && host) {
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    type P5Constructor = typeof import("p5").default;
+
+    // p5 is vendored in public/vendor and loaded as a classic script. Keeping
+    // it out of the module graph is what makes it lazy and page-specific:
+    // bundling it pulled 1.1 MB into the shared chunk every page loaded.
+    const loadP5 = (): Promise<P5Constructor> =>
+      new Promise((resolve, reject) => {
+        const existing = (window as unknown as { p5?: P5Constructor }).p5;
+        if (existing) {
+          resolve(existing);
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = "/vendor/p5-2.4.0.min.js";
+        script.async = true;
+        script.onload = () => {
+          const ctor = (window as unknown as { p5?: P5Constructor }).p5;
+          if (ctor) resolve(ctor);
+          else reject(new Error("p5 loaded but window.p5 is missing"));
+        };
+        script.onerror = () => reject(new Error("failed to load p5"));
+        document.head.appendChild(script);
+      });
+
+    const readPalette = () => {
+      const styles = getComputedStyle(document.documentElement);
+      const read = (name: string) => styles.getPropertyValue(name).trim();
+      return {
+        ink: read("--c-ink"),
+        muted: read("--c-muted"),
+        rule: read("--c-rule"),
+        accent: read("--c-accent"),
+        paper: read("--c-paper"),
+      };
+    };
+
+    const boot = async () => {
+      // Only the active sketch is downloaded; p5 is a separate cached asset,
+      // injected on idle so it never blocks first paint or other pages.
+      const { index, sketch } = await loadActiveSketch();
+      const P5 = await loadP5();
+
+      const rect = host.getBoundingClientRect();
+      const seed = Math.floor(Date.now() / 86_400_000);
+
+      const instance = new P5((p) => {
+        sketch.run({
+          p,
+          seed,
+          width: Math.max(1, Math.round(rect.width)),
+          height: Math.max(1, Math.round(rect.height)),
+          palette: readPalette(),
+          reduceMotion,
+        });
+      }, host);
+
+      if (caption) {
+        const number = String(index + 1).padStart(2, "0");
+        caption.textContent = `sketch ${number} — ${sketch.title} · rotates every ${ROTATION_DAYS} days`;
+      }
+
+      // Reduced motion: the sketch draws one frame and stops itself.
+      if (reduceMotion) return;
+
+      let visible = true;
+
+      const sync = () => {
+        if (visible && !document.hidden) instance.loop();
+        else instance.noLoop();
+      };
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          visible = entry?.isIntersecting ?? false;
+          sync();
+        },
+        { threshold: 0.1 },
+      );
+
+      observer.observe(root);
+      document.addEventListener("visibilitychange", sync);
+    };
+
+    const idle = (callback: () => void) => {
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(callback, { timeout: 2000 });
+      } else {
+        window.setTimeout(callback, 800);
+      }
+    };
+
+    idle(() => {
+      boot().catch((error) => {
+        console.warn("[sketch] failed to start", error);
+      });
+    });
+  }
+</script>

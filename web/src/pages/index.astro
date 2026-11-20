@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import Sketch from "../components/Sketch.astro";
 import { api } from "../lib/api";
 
 // Fetch stats and the 3 most recently updated entries in parallel
@@ -32,7 +33,7 @@ function formatDate(iso: string) {
     <header class="space-y-4">
       <div class="space-y-1">
         <h1 class="font-sans text-[length:var(--text-h1)] font-semibold tracking-tight text-ink">
-          Muhd Abayomi
+          Mo Abayomi
         </h1>
         <p class="font-mono text-[length:var(--text-meta)] uppercase tracking-wider text-muted">
           Software Engineer
@@ -46,6 +47,8 @@ function formatDate(iso: string) {
     </header>
 
     <hr class="my-12 border-rule" />
+
+    <Sketch />
 
     {/* In the wiki: counts */}
     <section aria-labelledby="wiki-stats-heading" class="space-y-2">
