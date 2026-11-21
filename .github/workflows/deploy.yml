@@ -61,13 +61,28 @@ jobs:
         if: steps.testdb.outputs.available != 'true'
         run: echo "No DATABASE_URL_TEST secret - skipping integration tests."
 
+      # Fail with a named setting instead of an opaque wrangler error.
+      - name: Check deploy configuration
+        run: |
+          missing=0
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || { echo "::error::Missing secret CLOUDFLARE_API_TOKEN"; missing=1; }
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || { echo "::error::Missing secret CLOUDFLARE_ACCOUNT_ID"; missing=1; }
+          [ -n "$WEB_ORIGIN" ] || { echo "::error::Missing variable WEB_ORIGIN (e.g. https://moyomi.xyz)"; missing=1; }
+          exit $missing
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WEB_ORIGIN: ${{ vars.WEB_ORIGIN }}
+
+      # Uses the pinned wrangler from api/devDependencies rather than the
+      # wrangler-action wrapper, so the actual error is in the log.
       - name: Deploy Worker
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: api
-          command: deploy --var WEB_ORIGIN:${{ vars.WEB_ORIGIN }}
+        working-directory: api
+        run: pnpm exec wrangler deploy --var WEB_ORIGIN:"$WEB_ORIGIN"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WEB_ORIGIN: ${{ vars.WEB_ORIGIN }}
 
   web:
     name: web — build, deploy to Pages
@@ -85,6 +100,20 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Check Pages configuration
+        run: |
+          missing=0
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || { echo "::error::Missing secret CLOUDFLARE_API_TOKEN"; missing=1; }
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || { echo "::error::Missing secret CLOUDFLARE_ACCOUNT_ID"; missing=1; }
+          [ -n "$PUBLIC_API_URL" ] || { echo "::error::Missing variable PUBLIC_API_URL (e.g. https://api.moyomi.xyz)"; missing=1; }
+          [ -n "$PAGES_PROJECT" ] || { echo "::error::Missing variable PAGES_PROJECT"; missing=1; }
+          exit $missing
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PUBLIC_API_URL: ${{ vars.PUBLIC_API_URL }}
+          PAGES_PROJECT: ${{ vars.PAGES_PROJECT }}
+
       # The build fetches published notes from the deployed API, so this job
       # must run after `api` (needs: api) and PUBLIC_API_URL must be reachable.
       - name: Build
@@ -93,8 +122,8 @@ jobs:
           PUBLIC_API_URL: ${{ vars.PUBLIC_API_URL }}
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy web/dist --project-name=${{ vars.PAGES_PROJECT }}
+        run: api/node_modules/.bin/wrangler pages deploy web/dist --project-name="$PAGES_PROJECT"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PAGES_PROJECT: ${{ vars.PAGES_PROJECT }}
