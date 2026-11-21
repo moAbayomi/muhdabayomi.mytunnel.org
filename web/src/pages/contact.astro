@@ -1,0 +1,51 @@
+---
+import Base from "../layouts/Base.astro";
+
+// Replace these before this page goes public.
+const email = "you@moyomi.xyz";
+const github = "https://github.com/moAbayomi";
+const linkedin = "https://www.linkedin.com/in/your-handle";
+---
+
+<Base
+  title="Contact — Muhd Abayomi"
+  description="Open to work and collaborations."
+>
+  <div class="max-w-[58ch]">
+    <p class="font-mono text-meta uppercase tracking-[0.18em] text-muted">contact</p>
+    <h1 class="mt-3 text-h2">Say hello.</h1>
+
+    <p class="mt-6 max-w-prose text-lede">
+      I'm open to work and collaborations. I'm early in this, I'm curious, and I'd rather
+      learn in the open than pretend I know it all.
+    </p>
+
+    <p class="mt-6 max-w-prose text-body text-muted">
+      The best way to reach me is email. I read everything that isn't spam.
+    </p>
+
+    <ul class="mt-8 space-y-3 font-mono text-body">
+      <li><a href={`mailto:${email}`} class="bracket-link">{email}</a></li>
+      <li><a href={github} class="bracket-link">github</a></li>
+      <li><a href={linkedin} class="bracket-link">linkedin</a></li>
+    </ul>
+
+    <section class="mt-12">
+      <h2 class="font-mono text-meta uppercase tracking-[0.18em] text-muted">
+        what i'm looking for
+      </h2>
+      <ul class="mt-4 list-disc space-y-2 pl-5 text-body text-muted">
+        <li>Work where I can learn from people who are better than me.</li>
+        <li>
+          Small collaborations, open source, or a project that needs another pair of
+          hands.
+        </li>
+        <li>Feedback on what I'm building. Brutal is fine.</li>
+      </ul>
+    </section>
+
+    <p class="mt-12 font-mono text-meta text-muted">
+      Or read the <a href="/resume" class="bracket-link">resume</a> first.
+    </p>
+  </div>
+</Base>

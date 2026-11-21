@@ -197,6 +197,8 @@ export const RESERVED_SLUGS = new Set([
   "404",
   "500",
   "_astro",
+  "resume",
+  "contact",
 ]);
 
 export function assertValidPublicSlug(slug: string): void {
