@@ -17,6 +17,14 @@ export type Env = {
   DEPLOY_HOOK_URL?: string;
   R2_PUBLIC_URL?: string;
   MEDIA_BUCKET: R2Bucket;
+  /**
+   * Alternative to DEPLOY_HOOK_URL: dispatch the GitHub Actions deploy
+   * workflow. Works with Direct Upload Pages projects, where deploy hooks do
+   * not have a build to trigger.
+   */
+  GITHUB_TOKEN?: string;
+  GITHUB_REPO?: string;
+  GITHUB_REF?: string;
 };
 
 export type AppEnv = {

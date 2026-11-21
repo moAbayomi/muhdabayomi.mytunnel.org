@@ -17,6 +17,48 @@ input), applies migrations, deploys the Worker, creates the Pages project, build
 deploys the site. It cannot attach custom domains/DNS or create the Pages deploy
 hook — those are steps 3–5 below.
 
+## Daily workflow (after setup)
+
+There are two kinds of change, and they take two paths.
+
+**Code** — pages, styles, the API. Commit and push to `main`. The workflow in
+`.github/workflows/deploy.yml` typechecks, deploys the Worker, builds the site and
+uploads it to Pages. That is the whole process: `git push`. No local commands.
+
+**Content** — notes edited in `/admin`. Those live in Postgres, not git. After
+publish, unpublish or delete, the editor calls `POST /v1/admin/rebuild`. That
+endpoint starts a build one of two ways:
+
+1. `DEPLOY_HOOK_URL` — a Pages deploy hook. Only works if the Pages project is
+   connected to Git, because a hook triggers a *build*.
+2. `GITHUB_TOKEN` + `GITHUB_REPO` — dispatches `deploy.yml` on GitHub. This works
+   with **Direct Upload** projects (what `wrangler pages deploy` creates), and keeps
+   CI as the single deploy path.
+
+Set one. For the GitHub path:
+
+```bash
+cd api
+wrangler secret put GITHUB_TOKEN   # fine-grained PAT: Actions = Read and write
+wrangler secret put GITHUB_REPO    # e.g. moAbayomi/<repo-name>
+wrangler secret put GITHUB_REF     # main (optional; defaults to main)
+```
+
+The workflow file must exist on the default branch for dispatch to work.
+
+### One-time setup for `git push`
+
+1. **Push the branch the workflow listens on.** It is `main`. If your work is on
+   another branch, merge it first.
+2. **GitHub → Settings → Secrets and variables → Actions**
+   - Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`; optional
+     `DATABASE_URL_TEST`.
+   - Variables: `WEB_ORIGIN`, `PUBLIC_API_URL`, `PAGES_PROJECT`.
+3. **Worker secrets** (step 3 below) are set once. A push does not change them.
+
+Without those secrets the workflow fails on the first run; the Actions log names
+the missing one.
+
 ## What gets deployed
 
 | Piece | Where | How |
@@ -67,7 +109,12 @@ wrangler secret put DATABASE_URL       # Neon pooled URL
 wrangler secret put ADMIN_PASSWORD     # the editor password
 wrangler secret put AUTH_SECRET        # openssl rand -base64 32
 wrangler secret put R2_PUBLIC_URL      # https://media…
-wrangler secret put DEPLOY_HOOK_URL    # step 5
+# Pick ONE rebuild method:
+wrangler secret put DEPLOY_HOOK_URL    # Git-connected Pages (step 5)
+# or:
+wrangler secret put GITHUB_TOKEN       # fine-grained PAT, Actions: read and write
+wrangler secret put GITHUB_REPO        # owner/repo
+wrangler secret put GITHUB_REF         # main (optional)
 ```
 
 `WEB_ORIGIN` is passed at deploy time by the workflow (`--var WEB_ORIGIN:…`), so
