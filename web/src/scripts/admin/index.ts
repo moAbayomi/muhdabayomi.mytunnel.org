@@ -159,7 +159,7 @@ function newNote() {
   titleInput?.focus();
 }
 
-async function save(): Promise<boolean> {
+async function save({ rebuild = true }: { rebuild?: boolean } = {}): Promise<boolean> {
   const title = titleInput?.value.trim() ?? "";
   const body = bodyInput?.value ?? "";
   const kind = (kindSelect?.value ?? "note") as NoteKind;
@@ -171,6 +171,8 @@ async function save(): Promise<boolean> {
   }
 
   try {
+    let published = false;
+
     if (currentId) {
       const updated = await api.admin.patchNote(
         currentId,
@@ -178,6 +180,7 @@ async function save(): Promise<boolean> {
         token,
       );
       currentUpdatedAt = updated.updated_at;
+      published = updated.status === "published";
       if (metaEl) metaEl.textContent = `${updated.status} · saved`;
     } else {
       const created = await api.admin.createNote(
@@ -186,12 +189,17 @@ async function save(): Promise<boolean> {
       );
       currentId = created.id;
       currentUpdatedAt = created.updated_at;
+      published = created.status === "published";
       if (metaEl) metaEl.textContent = `${created.status} · created`;
     }
 
     localStorage.removeItem(DRAFT_KEY);
     await refresh();
-    say("saved");
+
+    // Editing a published note changes the live page, so it needs a rebuild.
+    // A draft does not.
+    const suffix = published && rebuild ? await triggerRebuild() : "";
+    say(`saved${suffix}`);
     return true;
   } catch (error) {
     say(error instanceof Error ? error.message : "save failed", true);
@@ -199,29 +207,37 @@ async function save(): Promise<boolean> {
   }
 }
 
+/**
+ * The site is static: writing to Postgres changes nothing until a build
+ * re-reads it. The Pages deploy hook starts that build, so every mutation
+ * that changes published output has to call this.
+ */
+async function triggerRebuild(): Promise<string> {
+  try {
+    await api.admin.rebuild(token);
+    return " · rebuild triggered";
+  } catch (error) {
+    if (
+      error instanceof ApiError &&
+      (error.status === 503 || error.status === 502)
+    ) {
+      return " · rebuild not configured";
+    }
+    return error instanceof Error
+      ? ` · rebuild failed: ${error.message}`
+      : " · rebuild failed";
+  }
+}
+
 async function publish() {
-  if (!(await save()) || !currentId) return;
+  if (!(await save({ rebuild: false })) || !currentId) return;
 
   try {
     const note = await api.admin.publish(currentId, token);
     currentUpdatedAt = note.updated_at;
     if (metaEl) metaEl.textContent = `${note.status} · published`;
 
-    let rebuild = "";
-    try {
-      await api.admin.rebuild(token);
-      rebuild = " · rebuild triggered";
-    } catch (error) {
-      if (
-        error instanceof ApiError &&
-        (error.status === 503 || error.status === 502)
-      ) {
-        rebuild = " · rebuild not configured yet";
-      } else {
-        throw error;
-      }
-    }
-
+    const rebuild = await triggerRebuild();
     await refresh();
     say(`published${rebuild}`);
   } catch (error) {
@@ -236,7 +252,8 @@ async function unpublish() {
     const note = await api.admin.unpublish(currentId, token);
     currentUpdatedAt = note.updated_at;
     await refresh();
-    say("unpublished");
+    const rebuild = await triggerRebuild();
+    say(`unpublished${rebuild}`);
   } catch (error) {
     say(error instanceof Error ? error.message : "unpublish failed", true);
   }
@@ -246,11 +263,15 @@ async function remove() {
   if (!currentId) return;
   if (!window.confirm("Delete this note? It is a soft delete.")) return;
 
+  const wasPublished =
+    notes.find((note) => note.id === currentId)?.status === "published";
+
   try {
     await api.admin.remove(currentId, token);
     newNote();
     await refresh();
-    say("deleted");
+    const rebuild = wasPublished ? await triggerRebuild() : "";
+    say(`deleted${rebuild}`);
   } catch (error) {
     say(error instanceof Error ? error.message : "delete failed", true);
   }
