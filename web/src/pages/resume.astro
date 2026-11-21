@@ -1,15 +1,21 @@
 ---
 import Base from "../layouts/Base.astro";
+import { api } from "../lib/api";
 
-// Replace these before this page goes public. Keep it honest: the point is
-// curiosity and progress, not sounding like you already know everything.
 const email = "mmabayomi2208@gmail.com";
 const github = "https://github.com/moAbayomi";
-const linkedin = "https://www.linkedin.com/in/your-handle";
+const linkedin = "https://www.linkedin.com/in/moabayomi/";
+
+// The state-portal write-up lives in the wiki. Link it only if it exists so the
+// resume never points at a 404. Create a note titled "State forms email" in
+// /admin; it slugifies to this.
+const STATE_NOTE_SLUG = "state-forms-email";
+const directory = await api.notes.directory();
+const stateNote = directory.find((entry) => entry.slug === STATE_NOTE_SLUG);
 ---
 
 <Base
-  title="Resume — Muhd Abayomi"
+  title="Resume — Mo Abayomi"
   description="A snapshot of what I've built so far and what I'm learning."
 >
   <div class="max-w-[48rem]">
@@ -24,25 +30,26 @@ const linkedin = "https://www.linkedin.com/in/your-handle";
     </header>
 
     <p class="mt-8 max-w-prose text-lede">
-      I'm a developer who is still figuring things out, in public. This is a snapshot of
-      what I've done so far and what I'm trying to get better at — not a claim that I
-      know it all.
+      I'm a developer who is still figuring things out, in public. I've been working on
+      the web and I'm slowly moving toward systems — C, compilers, the lower layers. This
+      is a snapshot of what I've done so far and what I'm trying to get better at, not a
+      claim that I know it all.
     </p>
 
     <section class="mt-12">
       <h2 class="font-mono text-meta uppercase tracking-[0.18em] text-muted">now</h2>
       <ul class="mt-4 space-y-2 text-body">
         <li>
-          Looking for work and collaborations where I can learn from people better
-          than me.
+          Looking for work and collaborations where I can learn from people better than
+          me — and ask a lot of questions.
         </li>
         <li>
-          Building and breaking small things on the web — see the
-          <a href="/projects" class="bracket-link">projects</a> page.
+          Teaching myself systems: working through K&amp;R and Nand2Tetris (building a
+          computer and a compiler from scratch). Hard, and fun.
         </li>
         <li>
-          Getting comfortable with TypeScript, Postgres, and the unglamorous parts of
-          shipping something real.
+          Still getting comfortable with TypeScript, Postgres, and the unglamorous parts
+          of shipping something real. Not a guru in web or systems yet.
         </li>
       </ul>
     </section>
@@ -68,13 +75,26 @@ const linkedin = "https://www.linkedin.com/in/your-handle";
         </article>
 
         <article>
-          <h3 class="text-h3">[Project name]</h3>
-          <p class="mt-1 font-mono text-meta text-muted">[Stack]</p>
+          <h3 class="text-h3">Sales &amp; inventory</h3>
+          <p class="mt-1 font-mono text-meta text-muted">TypeScript</p>
           <p class="mt-2 max-w-prose text-body text-muted">
-            [What it does, what you learned, and one result. A number if you have one.]
+            An inventory and sales app for a fabric store: record stock, record sales,
+            and track what sold and what's left. The live demo is password-protected, so
+            the
+            <a
+              href="https://github.com/moAbayomi/inventory-wbsite"
+              class="underline decoration-rule underline-offset-4 hover:decoration-accent"
+            >
+              code
+            </a>
+            is the useful part.
           </p>
         </article>
       </div>
+
+      <p class="mt-6 font-mono text-meta text-muted">
+        More on the <a href="/projects" class="bracket-link">projects</a> page.
+      </p>
     </section>
 
     <section class="mt-12">
@@ -85,13 +105,29 @@ const linkedin = "https://www.linkedin.com/in/your-handle";
       <div class="mt-4 space-y-5">
         <div>
           <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 class="text-h3">[Role]</h3>
-            <span class="font-mono text-meta text-muted">[Year] – [Year]</span>
+            <h3 class="text-h3">Developer</h3>
+            <span class="font-mono text-meta text-muted">present</span>
           </div>
-          <p class="font-mono text-meta text-muted">[Company]</p>
+          <p class="font-mono text-meta text-muted">
+            M-Star Innovations Hub · Osogbo, Nigeria
+          </p>
           <ul class="mt-2 list-disc space-y-1 pl-5 text-body text-muted">
-            <li>[What you did, and the result. A number if you have one.]</li>
-            <li>[Another thing you did.]</li>
+            <li>
+              Added an email-delivery flow to a legacy PHP codebase that runs
+              state-owned websites: after submitting a form, users enter their email and
+              receive the details they submitted.
+            </li>
+            <li>
+              Worked inside an unfamiliar stack and a codebase I didn't write, keeping
+              the change small and compatible with the existing app.
+            </li>
+            {stateNote && (
+              <li>
+                <a href={`/${stateNote.slug}`} class="bracket-link">
+                  A note on how it works
+                </a>
+              </li>
+            )}
           </ul>
         </div>
       </div>
@@ -103,15 +139,23 @@ const linkedin = "https://www.linkedin.com/in/your-handle";
       </h2>
       <p class="mt-4 max-w-prose text-body">
         TypeScript, JavaScript, Astro, Hono, Postgres, Cloudflare Workers/Pages/R2,
-        Tailwind, Git. Comfortable learning whatever the problem needs.
+        Tailwind, Git. Learning C and the systems side: pointers, memory, compilers.
+        Comfortable learning whatever the problem needs.
       </p>
     </section>
 
     <section class="mt-12">
       <h2 class="font-mono text-meta uppercase tracking-[0.18em] text-muted">learning</h2>
       <ul class="mt-4 space-y-2 text-body">
-        <li>[Book or course] — [what stuck]</li>
-        <li>[Something you're practising right now]</li>
+        <li>
+          <em>The C Programming Language</em> (K&amp;R) — working through it slowly.
+          Humbling, but things are starting to stick.
+        </li>
+        <li>
+          <em>Nand2Tetris</em> — building a computer and a compiler from the ground up.
+          The hardest thing I've done in a while, and the most fun.
+        </li>
+        <li>Moving from web development toward systems programming.</li>
       </ul>
     </section>
 

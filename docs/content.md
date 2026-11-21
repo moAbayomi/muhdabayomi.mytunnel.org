@@ -74,18 +74,39 @@ so add each project as a note with `parent = projects` and `kind = project`.
 Each project note should answer: what it is, the stack, what you did, what you learned,
 one result or metric, and a link. If there is no metric, say what changed.
 
+## State-portal note (the resume link)
+
+The resume links to this only if a note with slug `state-forms-email` exists. Create it
+in `/admin` with the title **State forms email** (the slug is derived from the title)
+and publish it. Until then, the resume shows the work without a link.
+
+Body suggestion:
+
+> At M-Star Innovations Hub I added a small flow to a legacy PHP codebase that runs
+> state-owned websites. After a user submits a form, they can enter their email and
+> receive the details they submitted.
+>
+> The constraints were the interesting part: an unfamiliar codebase, an older stack,
+> and a change that had to fit the existing app rather than replace it.
+>
+> I can't share the code or screenshots here — it isn't my code to publish. This is a
+> description of the work.
+
+Do not include screenshots, internal URLs, client names, or code unless you have
+permission. "State-owned websites" is enough detail for a portfolio.
+
 ## `/resume`
 
-Edit `web/src/pages/resume.astro`. Replace every `[bracketed]` placeholder:
+Edit `web/src/pages/resume.astro`. It now has the real M-Star role, the inventory
+project (linking the public repo), this site, and K&amp;R/Nand2Tetris under learning.
 
-- `email` and `linkedin` in the frontmatter
-- role, company, dates, bullets
-- the second project
-- learning items
+- Add your start year at M-Star; the page currently says "present" only.
+- Drop your PDF at `web/public/resume.pdf`; the "pdf" link points there.
+- The state-portal link appears only when the `state-forms-email` note exists.
 
-Drop your PDF at `web/public/resume.pdf`; the "pdf" link points there.
-
-Keep the resume to one page. Bullets should be results, not duties.
+Keep it curated. The resume is the highlight reel; `/projects` is the full log. When
+the highlight list gets long enough that editing two places is a chore, add a
+`featured_rank` column to `notes` and render the top few automatically.
 
 ## `/contact`
 
